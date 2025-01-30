@@ -1,8 +1,8 @@
-import httpStatus from "http-status";
-import sendResponse from "../../utils/sendResponse";
-import catchAsync from "../../utils/catchAsync";
 import { Request, Response } from "express";
 import { FavouriteServices } from "./favourite.service";
+import catchAsync from "../../../utils/catchAsync";
+import sendResponse from "../../../utils/sendResponse";
+import httpStatus from "http-status";
 
 const addToFavourite = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
@@ -10,7 +10,7 @@ const addToFavourite = catchAsync(async (req: Request, res: Response) => {
   const result = await FavouriteServices.addToFavourite(userId, productId);
 
   sendResponse(res, {
-    statusCode: httpStatus.CREATED,
+    statusCode: httpStatus.OK,
     message: "Product added to favourite successfully",
     data: result,
   });

@@ -226,7 +226,8 @@ model Donation {
 
   // Relationships
   favorites Favourite[] @relation("ProductFavourite")
-  Review    Review[]
+
+  Review Review[]
 
   @@map("products")
 }

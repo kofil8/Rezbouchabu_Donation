@@ -5,15 +5,15 @@ const router = express.Router();
 
 router.post(
   "/:productId",
-  auth("USER", "ADMIN"),
+  auth("DONOR", "ADMIN"),
   FavouriteControllers.addToFavourite
 );
 
-router.get("/", auth("USER", "ADMIN"), FavouriteControllers.getMyFavourite);
+router.get("/", auth("DONOR", "ADMIN"), FavouriteControllers.getMyFavourite);
 
 router.delete(
   "/:productId",
-  auth("USER", "ADMIN"),
+  auth("DONOR", "ADMIN"),
   FavouriteControllers.removeFromFavourite
 );
 
