@@ -1,0 +1,9 @@
+[0mPOST /api/v1/auth/login [32m200[0m 574.477 ms - 435[0m
+[0mPOST /api/v1/auth/login [32m200[0m 668.500 ms - 435[0m
+[0mGET /api/v1/users/ [32m200[0m 70.933 ms - 782[0m
+[0mPOST /api/v1/users/register [32m201[0m 5089.688 ms - 212[0m
+[0mPOST /api/v1/users/verify-otp [32m200[0m 689.115 ms - 421[0m
+[0mPOST /api/v1/auth/login [32m200[0m 585.949 ms - 430[0m
+[0mPOST /api/v1/reviews/ [32m201[0m 236.328 ms - 304[0m
+[0mPOST /api/v1/reviews/ [32m201[0m 211.055 ms - 298[0m
+[0mDELETE /api/v1/reviews/679b5b2e5a2d13fb56824889 [32m200[0m 133.979 ms - 73[0m

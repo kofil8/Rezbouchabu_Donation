@@ -1,0 +1,320 @@
+// datasource and generator setup
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------
+//  ENUMS
+// ---------------------------------------------------------
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SELLER
+  DONOR
+}
+
+enum NotificationType {
+  DONATION
+  REVIEW
+  PLAN
+  MESSAGE
+}
+
+enum DonationStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum DonorLevel {
+  BABYGEEVER
+  GEEVER
+  ELDERGEEVER
+  SENIORGEEVER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+}
+
+enum SubscriptionPlanType {
+  MONTHLY
+  YEARLY
+}
+
+model User {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  email        String    @unique
+  password     String
+  firstName    String
+  lastName     String
+  profileImage String?
+  dateOfBirth  DateTime?
+  phoneNumber  String?
+  role         Role      @default(DONOR)
+  city         String?
+  country      String?
+  fcmToken     String?
+  profile      String?
+
+  latitude  Float?
+  longitude Float?
+
+  isOnline   Boolean @default(false)
+  isVerified Boolean @default(false)
+
+  stripeCustomerId String?
+
+  donations     Order[]         @relation
+  reviews       Review[]        @relation
+  messages      Message[]       @relation("UserMessages")
+  subscriptions Subscription[]
+  notifications Notifications[] @relation("Notifications")
+  chatId        String?         @db.ObjectId
+  Chat          Chat?           @relation(fields: [chatId], references: [id])
+
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+  AddToCart                 AddToCart[]      @relation("UserAddToCart")
+  Favourite                 Favourite[]      @relation("UserFavourite")
+  Payment                   Payment[]
+  level                     level[]
+  Otp                       Otp[]
+  PrivateMessage            PrivateMessage[]
+  participant1Conversations Conversation[]   @relation("participant1")
+  participant2Conversations Conversation[]   @relation("participant2")
+  Conversation              Conversation[]
+
+  @@map("users")
+}
+
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  otp       Int
+  hexCode   String?
+  expiry    DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?  @db.ObjectId
+
+  @@map("otps")
+}
+
+model Conversation {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  name           String           @unique
+  participant1Id String           @db.ObjectId
+  participant1   User             @relation("participant1", fields: [participant1Id], references: [id])
+  participant2Id String           @db.ObjectId
+  participant2   User             @relation("participant2", fields: [participant2Id], references: [id])
+  messages       PrivateMessage[]
+  User           User?            @relation(fields: [userId], references: [id])
+  userId         String?          @db.ObjectId
+
+  @@map("conversations")
+}
+
+model PrivateMessage {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  content          String
+  imageUrl         String[]
+  senderId         String       @db.ObjectId
+  sender           User         @relation(fields: [senderId], references: [id])
+  conversationName String
+  conversation     Conversation @relation(fields: [conversationName], references: [name])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@map("private_messages")
+}
+
+model level {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  level     DonorLevel @default(BABYGEEVER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String?    @db.ObjectId
+  User      User?      @relation(fields: [userId], references: [id])
+
+  @@map("levels")
+}
+
+model antiWasteProduct {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  Title       String
+  Description String?
+  Price       Float
+  discount    Float
+  Image       String
+  type        String
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("antiWasteProducts")
+}
+
+model Subscription {
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  description          String
+  price                Float
+  discount             Float?
+  startDate            DateTime
+  endDate              DateTime?
+  renewedAt            DateTime?
+  user                 User               @relation(fields: [userId], references: [id])
+  userId               String             @db.ObjectId
+  status               SubscriptionStatus
+  currentPeriodEnd     DateTime
+  stripeSubscriptionId String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model Notifications {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  receiverId String   @db.ObjectId
+  senderId   String   @db.ObjectId
+  title      String
+  body       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [receiverId], references: [id], name: "Notifications")
+
+  @@map("notifications")
+}
+
+model Donation {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String
+  price        Float
+  quantity     Int
+  productImage String
+  inStock      Int
+  rating       Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  favorites Favourite[] @relation("ProductFavourite")
+  Review    Review[]
+
+  @@map("products")
+}
+
+model AddToCart {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?  @db.ObjectId
+  donationId String?  @db.ObjectId
+  quantity   Int?
+  user       User?    @relation(fields: [userId], references: [id], name: "UserAddToCart")
+  // donation   Donation? @relation(fields: [donationId], references: [id], name: "DonationAddToCart")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Favourite {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?   @db.ObjectId
+  donationId String?   @db.ObjectId
+  user       User?     @relation(fields: [userId], references: [id], name: "UserFavourite")
+  donation   Donation? @relation(fields: [donationId], references: [id], name: "ProductFavourite")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Order {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String @db.ObjectId
+  user       User   @relation(fields: [userId], references: [id])
+  businessId String @db.ObjectId
+  donationId String @db.ObjectId
+  quantity   Int
+  total      Float
+
+  status    DonationStatus
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("orders")
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  donation   Donation? @relation(fields: [donationId], references: [id])
+  donationId String?   @db.ObjectId
+
+  @@map("reviews")
+}
+
+// model Payment {
+//   id              String   @id @default(auto()) @map("_id") @db.ObjectId
+//   paymentIntentId String?
+//   userId          String?  @db.ObjectId
+//   amount          Float?
+//   customerId      String?
+//   bookingId       String?  @db.ObjectId
+//   paymentMethodId String?
+//   paymentDate     DateTime
+//   user            User?    @relation(fields: [userId], references: [id])
+//   createdAt       DateTime @default(now())
+//   updatedAt       DateTime @updatedAt
+// }
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderId  String   @db.ObjectId
+  sender    User     @relation(fields: [senderId], references: [id], name: "UserMessages")
+  chatId    String   @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  Chat      Chat     @relation(fields: [chatId], references: [id])
+
+  @@map("messages")
+}
+
+model Chat {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  createdAt DateTime  @default(now())
+  User      User[]
+  Message   Message[]
+
+  @@map("chats")
+}
