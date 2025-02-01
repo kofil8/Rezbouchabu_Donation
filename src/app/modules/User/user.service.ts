@@ -110,8 +110,6 @@ const verifyOtp = async (payload: {
     },
   });
 
-  console.log(otpData?.otp, payload.otp);
-
   if (otpData?.otp !== payload.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
   }
@@ -160,7 +158,6 @@ const verifyOtp = async (payload: {
       id: userData.id,
       email: userData.email as string,
       role: userData.role,
-      fcmToken: payload.fcpmToken,
       isVerified: updatedUser.isVerified,
       isOnline: updatedUser.isOnline,
     },

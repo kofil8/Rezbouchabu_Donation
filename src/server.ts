@@ -22,7 +22,6 @@ async function main() {
   seedSuperAdmin();
   const activeUsers: Map<string, boolean> = new Map();
 
-  // Initialize WebSocket server
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws: ExtendedWebSocket) => {

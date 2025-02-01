@@ -12,6 +12,7 @@ export default {
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
   stripe_client_id: process.env.STRIPE_CLIENT_ID,
+  super_admin_email: process.env.SUPER_ADMIN_EMAIL,
   super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
   port: process.env.PORT || 5000,
   salt: process.env.SALT || 12,

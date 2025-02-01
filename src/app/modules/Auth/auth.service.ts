@@ -57,7 +57,6 @@ const loginUserFromDB = async (payload: {
       id: userData.id,
       email: userData.email as string,
       role: userData.role,
-      fcmToken: userData.fcmToken,
       isOnline: userData.isOnline,
     },
     config.jwt.jwt_secret as Secret,
