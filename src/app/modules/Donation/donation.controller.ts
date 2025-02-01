@@ -5,9 +5,10 @@ import sendResponse from "../../../utils/sendResponse";
 import { DonationServices } from "./donation.service";
 
 const createDonation = catchAsync(async (req: Request, res: Response) => {
+  const id = req.user.id;
   const payload = req.body.bodyData;
   const file = req.file as any;
-  const result = await DonationServices.createDonationIntoDB(payload, file);
+  const result = await DonationServices.createDonationIntoDB(id, payload, file);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,

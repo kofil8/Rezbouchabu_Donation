@@ -7,6 +7,7 @@ export const generateToken = (
     role: string;
     fcmToken?: string | null;
     isOnline?: boolean;
+    isVerified?: boolean;
   },
   secret: Secret,
   expiresIn: string

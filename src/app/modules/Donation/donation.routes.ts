@@ -7,28 +7,24 @@ const router = express.Router();
 
 router.post(
   "/",
-  auth("DONOR", "SUPER_ADMIN", "ADMIN"),
+  auth(),
   fileUploader.uploadDonationImage,
   parseBodyData,
   DonationControllers.createDonation
 );
 
-router.get("/", DonationControllers.getAllDonations);
+router.get("/", auth(), DonationControllers.getAllDonations);
 
-router.get("/:id", DonationControllers.getSingleDonation);
+router.get("/:id", auth(), DonationControllers.getSingleDonation);
 
 router.put(
   "/:id",
-  auth("DONOR", "SUPERADMIN", "ADMIN"),
+  auth(),
   fileUploader.uploadDonationImage,
   parseBodyData,
   DonationControllers.updateDonation
 );
 
-router.delete(
-  "/:id",
-  auth("DONOR", "SUPER_ADMIN", "ADMIN"),
-  DonationControllers.deleteDonation
-);
+router.delete("/:id", auth(), DonationControllers.deleteDonation);
 
 export const DonationRouters = router;

@@ -31,34 +31,45 @@ const getMyProfileFromDB = async (id: string) => {
 const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
   const existingUser = await prisma.user.findUnique({
     where: { id },
-    select: {
-      id: true,
-      profileImage: true,
-    },
+    select: { id: true, profileImage: true },
   });
 
   if (!existingUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  const profileImage = file?.originalname
-    ? `${config.backend_image_url}/uploads/${file.originalname}`
-    : existingUser.profileImage;
+  const profileImage =
+    file && file.originalname
+      ? `${config.backend_image_url}/uploads/${file.originalname}`
+      : existingUser.profileImage;
 
-  const updatedData = {
-    ...payload,
-    profileImage,
-  };
+  // Check if payload is a string and parse it if necessary
+  let parsedPayload = payload;
+  if (typeof payload === "string") {
+    try {
+      parsedPayload = JSON.parse(payload);
+    } catch (error) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
+    }
+  }
 
+  const { firstName, lastName } = parsedPayload;
+
+  const fullName = `${firstName} ${lastName}`;
+
+  // Now update using only valid keys
   const result = await prisma.user.update({
-    where: {
-      id: id,
+    where: { id },
+    data: {
+      profileImage,
+      ...parsedPayload,
+      fullName,
     },
-    data: updatedData,
     select: {
       id: true,
       firstName: true,
       lastName: true,
+      fullName: true,
       gender: true,
       address: true,
       city: true,

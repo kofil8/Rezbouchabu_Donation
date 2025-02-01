@@ -2,22 +2,136 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import config from "../../../config";
 import httpStatus from "http-status";
+import { jwtHelpers } from "../../../helpars/jwtHelpers";
+import { Secret } from "jsonwebtoken";
 
-const createDonationIntoDB = async (payload: any, file: any) => {
+// const createDonationIntoDB = async (id: string, payload: any, file: any) => {
+//   const existingUser = await prisma.user.findUnique({
+//     where: { id },
+//     select: {
+//       id: true,
+//     },
+//   });
+
+//   if (!existingUser) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+//   }
+
+//   const userId = existingUser.id;
+//   console.log(userId);
+
+//   const donationImage = file?.originalname
+//     ? `${process.env.BACKEND_BASE_URL}/uploads/${file.originalname}`
+//     : null;
+
+//   const existingDonation = await prisma.donation.findUnique({
+//     where: { id: payload.id },
+//   });
+//   if (existingDonation) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "Donation already exists");
+//   }
+
+//   const donation = await prisma.donation.create({
+//     data: {
+//       ...payload,
+//       donationImage,
+//     },
+//     select: {
+//       id: true,
+//       name: true,
+//       description: true,
+//       donationImage: true,
+//       category: true,
+//       condition: true,
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//   });
+//   return donation;
+// };
+
+// const createDonationIntoDB = async (id: string, payload: any, file: any) => {
+//   const existingUser = await prisma.user.findUnique({
+//     where: { id },
+//     select: {
+//       id: true,
+//     },
+//   });
+
+//   if (!existingUser) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+//   }
+
+//   const existingDonation = await prisma.donation.findUnique({
+//     where: {},
+//   });
+//   if (existingDonation) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "Donation already exists");
+//   }
+
+//   const userId = existingUser.id;
+
+//   const donationImage = file?.originalname
+//     ? `${process.env.BACKEND_BASE_URL}/uploads/${file.originalname}`
+//     : null;
+
+//   let parsedPayload = payload;
+//   if (typeof payload === "string") {
+//     try {
+//       parsedPayload = JSON.parse(payload);
+//     } catch (error) {
+//       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
+//     }
+//   }
+
+//   const donation = await prisma.donation.create({
+//     data: {
+//       ...parsedPayload,
+//       donationImage,
+//     },
+//     select: {
+//       id: true,
+//       name: true,
+//       description: true,
+//       donationImage: true,
+//       category: true,
+//       condition: true,
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//   });
+
+//   return donation;
+// };
+
+const createDonationIntoDB = async (id: string, payload: any, file: any) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: id },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!existingUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+  }
+
   const donationImage = file?.originalname
-    ? `${process.env.BACKEND_BASE_URL}/uploads/${file.originalname}`
+    ? `${config.backend_image_url}/uploads/${file.originalname}`
     : null;
 
-  const existingDonation = await prisma.donation.findUnique({
-    where: { id: payload.id },
-  });
-  if (existingDonation) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Donation already exists");
+  let parsedPayload = payload;
+  if (typeof payload === "string") {
+    try {
+      parsedPayload = JSON.parse(payload);
+    } catch (error) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
+    }
   }
 
   const donation = await prisma.donation.create({
     data: {
-      ...payload,
+      ...parsedPayload,
       donationImage,
     },
     select: {
@@ -31,6 +145,7 @@ const createDonationIntoDB = async (payload: any, file: any) => {
       updatedAt: true,
     },
   });
+
   return donation;
 };
 

@@ -58,15 +58,12 @@ const registerUserIntoDB = async (payload: any) => {
 
   const emailSubject = "OTP Verification for Registration";
 
-  // Plain text version
   const emailText = `Your OTP is: ${otp}`;
 
   const textForRegistration = `Thank you for registering with Rezbouchabu. To complete your registration, please verify your email address by entering the verification code below.`;
 
-  // HTML content for the email design
   const emailHTML = emailTemplate(otp, textForRegistration);
 
-  // Send email with both plain text and HTML
   await sentEmailUtility(payload.email, emailSubject, emailText, emailHTML);
 
   const otpExpiry = new Date();
@@ -85,13 +82,14 @@ const registerUserIntoDB = async (payload: any) => {
     email: user.email,
     fullName: user.fullName,
     role: user.role,
+    isVerified: user.isVerified,
   };
 };
 
 const verifyOtp = async (payload: {
   fcpmToken?: string;
   email: string;
-  otp: number; // take string as number
+  otp: number;
 }) => {
   // Check if the user exists
   const userData = await prisma.user.findUnique({
@@ -108,8 +106,11 @@ const verifyOtp = async (payload: {
   const otpData = await prisma.otp.findFirst({
     where: {
       email: payload.email,
+      otp: payload.otp,
     },
   });
+
+  console.log(otpData?.otp, payload.otp);
 
   if (otpData?.otp !== payload.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
@@ -119,19 +120,7 @@ const verifyOtp = async (payload: {
     throw new ApiError(httpStatus.BAD_REQUEST, "OTP has expired");
   }
 
-  if (userData.isVerified !== true) {
-    await prisma.user.update({
-      where: {
-        id: userData.id,
-      },
-      data: {
-        isVerified: true,
-        isOnline: true,
-      },
-    });
-  }
-
-  // Remove the OTP after successful verification
+  // Delete the OTP
   await prisma.otp.delete({
     where: {
       id: otpData.id,
@@ -150,13 +139,30 @@ const verifyOtp = async (payload: {
     });
   }
 
+  // Mark the user as verified
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      email: payload.email,
+    },
+    data: {
+      isVerified: true,
+      isOnline: true,
+    },
+    select: {
+      isVerified: true,
+      isOnline: true,
+    },
+  });
+
   const accessToken = generateToken(
     {
       id: userData.id,
       email: userData.email as string,
       role: userData.role,
       fcmToken: payload.fcpmToken,
-      isOnline: true,
+      isVerified: updatedUser.isVerified,
+      isOnline: updatedUser.isOnline,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.expires_in as string
@@ -168,6 +174,8 @@ const verifyOtp = async (payload: {
     email: userData.email,
     fullName: userData.fullName,
     role: userData.role,
+    isOnline: updatedUser.isOnline,
+    isVerified: updatedUser.isVerified,
   };
 };
 
@@ -195,31 +203,6 @@ const getAllUsersFromDB = async () => {
   return result;
 };
 
-// const getMyProfileFromDB = async (id: string) => {
-//   const Profile = await prisma.user.findUnique({
-//     where: {
-//       id: id,
-//     },
-//     select: {
-//       id: true,
-//       firstName: true,
-//       lastName: true,
-//       dateOfBirth: true,
-//       address: true,
-//       country: true,
-//       city: true,
-//       phoneNumber: true,
-//       email: true,
-//       isOnline: true,
-//       profileImage: true,
-//       createdAt: true,
-//       updatedAt: true,
-//     },
-//   });
-
-//   return Profile;
-// };
-
 const getUserDetailsFromDB = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -241,45 +224,6 @@ const getUserDetailsFromDB = async (id: string) => {
   });
   return user;
 };
-
-// const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
-//   const existingUser = await prisma.user.findUnique({
-//     where: { id },
-//   });
-
-//   if (!existingUser) {
-//     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
-//   }
-
-//   const profileImage = file?.originalname
-//     ? `${config.backend_image_url}/uploads/${file.originalname}`
-//     : existingUser.profileImage;
-
-//   const updatedData = {
-//     ...payload,
-//     profileImage,
-//   };
-
-//   const result = await prisma.user.update({
-//     where: {
-//       id: id,
-//     },
-//     data: updatedData,
-//     select: {
-//       id: true,
-//       firstName: true,
-//       lastName: true,
-//       dateOfBirth: true,
-//       phoneNumber: true,
-//       email: true,
-//       isOnline: true,
-//       profileImage: true,
-//       createdAt: true,
-//       updatedAt: true,
-//     },
-//   });
-//   return result;
-// };
 
 const deleteUser = async (id: string) => {
   const existingUser = await prisma.user.findUnique({
