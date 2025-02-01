@@ -6,6 +6,7 @@ export const generateToken = (
     email: string;
     role: string;
     fcmToken?: string | null;
+    isOnline?: boolean;
   },
   secret: Secret,
   expiresIn: string

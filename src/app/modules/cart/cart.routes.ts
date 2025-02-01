@@ -1,7 +1,7 @@
 import express from "express";
 import auth from "../../middlewares/auth";
-import { CartControllers } from "./cart.controller";
 import validateRequest from "../../middlewares/validateRequest";
+import { CartControllers } from "./cart.controller";
 import { CartValidations } from "./cart.validation";
 const router = express.Router();
 
@@ -19,9 +19,9 @@ router.get(
 );
 
 router.delete(
-  "/:productId",
+  "/:DonationId",
   auth("BUSINESS", "ADMIN"),
-  CartControllers.removeProductFromCart
+  CartControllers.removeDonationFromCart
 );
 
 export const CartRouters = router;

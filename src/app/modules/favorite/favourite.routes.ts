@@ -4,7 +4,7 @@ import { FavouriteControllers } from "./favourite.controller";
 const router = express.Router();
 
 router.post(
-  "/:productId",
+  "/:DonationId",
   auth("DONOR", "ADMIN"),
   FavouriteControllers.addToFavourite
 );
@@ -12,7 +12,7 @@ router.post(
 router.get("/", auth("DONOR", "ADMIN"), FavouriteControllers.getMyFavourite);
 
 router.delete(
-  "/:productId",
+  "/:DonationId",
   auth("DONOR", "ADMIN"),
   FavouriteControllers.removeFromFavourite
 );

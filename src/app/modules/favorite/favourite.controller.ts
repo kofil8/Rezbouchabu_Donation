@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import { FavouriteServices } from "./favourite.service";
+import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
-import httpStatus from "http-status";
+import { FavouriteServices } from "./favourite.service";
 
 const addToFavourite = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const productId = req.params.productId;
-  const result = await FavouriteServices.addToFavourite(userId, productId);
+  const DonationId = req.params.DonationId;
+  const result = await FavouriteServices.addToFavourite(userId, DonationId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Product added to favourite successfully",
+    message: "Donation added to favourite successfully",
     data: result,
   });
 });
@@ -29,12 +29,15 @@ const getMyFavourite = catchAsync(async (req: Request, res: Response) => {
 
 const removeFromFavourite = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const productId = req.params.productId;
-  const result = await FavouriteServices.removeFromFavourite(userId, productId);
+  const DonationId = req.params.DonationId;
+  const result = await FavouriteServices.removeFromFavourite(
+    userId,
+    DonationId
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Product removed from favourite successfully",
+    message: "Donation removed from favourite successfully",
     data: result,
   });
 });

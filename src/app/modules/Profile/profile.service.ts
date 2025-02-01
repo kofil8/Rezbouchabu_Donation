@@ -1,69 +1,79 @@
 import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
+import config from "../../../config";
 
-interface UpdateUserInput {
-  firstName?: string;
-  lastName?: string;
-}
-
-const updateUser = async (email: string, updates: UpdateUserInput) => {
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-  }
-
-  if ("password" in updates) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "updates are not allowed");
-  }
-
-  const { firstName, lastName } = updates;
-
-  const updatedUser = await prisma.user.update({
-    where: { email },
-    data: {
-      firstName: firstName || user.firstName,
-      lastName: lastName || user.lastName,
+const getMyProfileFromDB = async (id: string) => {
+  const Profile = await prisma.user.findUnique({
+    where: {
+      id: id,
     },
     select: {
       id: true,
+      firstName: true,
+      lastName: true,
+      dateOfBirth: true,
+      address: true,
+      country: true,
+      city: true,
+      phoneNumber: true,
       email: true,
-      status: true,
+      isOnline: true,
       profileImage: true,
       createdAt: true,
       updatedAt: true,
-      firstName: true,
-      lastName: true,
     },
   });
 
-  return updatedUser;
+  return Profile;
 };
 
-const updateUserProfileImage = async (
-  userId: string,
-  profileImageUrl: string
-) => {
+const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
   const existingUser = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id },
+    select: {
+      id: true,
+      profileImage: true,
+    },
   });
 
   if (!existingUser) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { profileImage: profileImageUrl },
+  const profileImage = file?.originalname
+    ? `${config.backend_image_url}/uploads/${file.originalname}`
+    : existingUser.profileImage;
+
+  const updatedData = {
+    ...payload,
+    profileImage,
+  };
+
+  const result = await prisma.user.update({
+    where: {
+      id: id,
+    },
+    data: updatedData,
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      gender: true,
+      address: true,
+      city: true,
+      country: true,
+      dateOfBirth: true,
+      phoneNumber: true,
+      profileImage: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
-
-  updateUser,
-
-  return { id, email, profileImage };
+  return result;
 };
 
 export const ProfileServices = {
-  // updateUser,
-  updateUserProfileImage,
+  getMyProfileFromDB,
+  updateMyProfileIntoDB,
 };

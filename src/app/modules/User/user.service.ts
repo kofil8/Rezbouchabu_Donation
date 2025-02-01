@@ -42,9 +42,12 @@ const registerUserIntoDB = async (payload: any) => {
     );
   }
 
+  const fullName = `${payload.firstName} ${payload.lastName}`;
+
   const user = await prisma.user.create({
     data: {
       ...payload,
+      fullName,
       password: hashedPassword,
       stripeCustomerId: customer.id,
     },
@@ -80,6 +83,7 @@ const registerUserIntoDB = async (payload: any) => {
   return {
     id: user.id,
     email: user.email,
+    fullName: user.fullName,
     role: user.role,
   };
 };
@@ -152,6 +156,7 @@ const verifyOtp = async (payload: {
       email: userData.email as string,
       role: userData.role,
       fcmToken: payload.fcpmToken,
+      isOnline: true,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.expires_in as string
@@ -161,6 +166,7 @@ const verifyOtp = async (payload: {
     accessToken,
     id: userData.id,
     email: userData.email,
+    fullName: userData.fullName,
     role: userData.role,
   };
 };
@@ -189,29 +195,30 @@ const getAllUsersFromDB = async () => {
   return result;
 };
 
-const getMyProfileFromDB = async (id: string) => {
-  const Profile = await prisma.user.findUnique({
-    where: {
-      id: id,
-    },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      dateOfBirth: true,
-      country: true,
-      city: true,
-      phoneNumber: true,
-      email: true,
-      isOnline: true,
-      profileImage: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+// const getMyProfileFromDB = async (id: string) => {
+//   const Profile = await prisma.user.findUnique({
+//     where: {
+//       id: id,
+//     },
+//     select: {
+//       id: true,
+//       firstName: true,
+//       lastName: true,
+//       dateOfBirth: true,
+//       address: true,
+//       country: true,
+//       city: true,
+//       phoneNumber: true,
+//       email: true,
+//       isOnline: true,
+//       profileImage: true,
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//   });
 
-  return Profile;
-};
+//   return Profile;
+// };
 
 const getUserDetailsFromDB = async (id: string) => {
   const user = await prisma.user.findUnique({
@@ -235,44 +242,44 @@ const getUserDetailsFromDB = async (id: string) => {
   return user;
 };
 
-const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
-  const existingUser = await prisma.user.findUnique({
-    where: { id },
-  });
+// const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
+//   const existingUser = await prisma.user.findUnique({
+//     where: { id },
+//   });
 
-  if (!existingUser) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
-  }
+//   if (!existingUser) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+//   }
 
-  const profileImage = file?.originalname
-    ? `${process.env.BACKEND_IMAGE_URL}/uploads/${file.originalname}`
-    : existingUser.profileImage;
+//   const profileImage = file?.originalname
+//     ? `${config.backend_image_url}/uploads/${file.originalname}`
+//     : existingUser.profileImage;
 
-  const updatedData = {
-    ...payload,
-    profileImage,
-  };
+//   const updatedData = {
+//     ...payload,
+//     profileImage,
+//   };
 
-  const result = await prisma.user.update({
-    where: {
-      id: id,
-    },
-    data: updatedData,
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      dateOfBirth: true,
-      phoneNumber: true,
-      email: true,
-      isOnline: true,
-      profileImage: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-  return result;
-};
+//   const result = await prisma.user.update({
+//     where: {
+//       id: id,
+//     },
+//     data: updatedData,
+//     select: {
+//       id: true,
+//       firstName: true,
+//       lastName: true,
+//       dateOfBirth: true,
+//       phoneNumber: true,
+//       email: true,
+//       isOnline: true,
+//       profileImage: true,
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//   });
+//   return result;
+// };
 
 const deleteUser = async (id: string) => {
   const existingUser = await prisma.user.findUnique({
@@ -477,9 +484,7 @@ const changePassword = async (userId: string, payload: any) => {
 export const UserServices = {
   registerUserIntoDB,
   getAllUsersFromDB,
-  getMyProfileFromDB,
   getUserDetailsFromDB,
-  updateMyProfileIntoDB,
   deleteUser,
   forgotPassword,
   resetPassword,

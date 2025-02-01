@@ -25,17 +25,6 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const id = req.user.id;
-  const result = await UserServices.getMyProfileFromDB(id);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "Profile retrieved successfully",
-    data: result,
-  });
-});
-
 const getUserDetails = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await UserServices.getUserDetailsFromDB(id);
@@ -43,19 +32,6 @@ const getUserDetails = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "User details retrieved successfully",
-    data: result,
-  });
-});
-
-const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const id = req.user.id;
-  const payload = req.body.bodyData;
-  const file = req.file as any;
-  const result = await UserServices.updateMyProfileIntoDB(id, payload, file);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "User profile updated successfully",
     data: result,
   });
 });
@@ -132,9 +108,7 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 export const UserControllers = {
   registerUser,
   getAllUsers,
-  getMyProfile,
   getUserDetails,
-  updateMyProfile,
   deleteUser,
   forgotPassword,
   ResetOtpVerify,

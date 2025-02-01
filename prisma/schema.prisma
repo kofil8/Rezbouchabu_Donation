@@ -35,9 +35,13 @@ enum DonationStatus {
 
 enum DonorLevel {
   BABYGEEVER
-  GEEVER
-  ELDERGEEVER
-  SENIORGEEVER
+  LITTLEGEEVER
+  TEENGEEVER
+  ADULTGEEVER
+  STRONGGEEVER
+  MASTERGEEVER
+  KINGOFTHEGEEVERS
+  GEEVERGOD
 }
 
 enum SubscriptionStatus {
@@ -57,6 +61,8 @@ model User {
   password     String
   firstName    String
   lastName     String
+  fullName     String?
+  gender       String?
   profileImage String?
   dateOfBirth  DateTime?
   phoneNumber  String?
@@ -64,7 +70,7 @@ model User {
   city         String?
   country      String?
   fcmToken     String?
-  profile      String?
+  address      String?
 
   latitude  Float?
   longitude Float?
@@ -72,27 +78,24 @@ model User {
   isOnline   Boolean @default(false)
   isVerified Boolean @default(false)
 
-  stripeCustomerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stripeCustomerId String?        @unique
+  subscriptions    Subscription[]
 
   donations     Order[]         @relation
   reviews       Review[]        @relation
-  messages      Message[]       @relation("UserMessages")
-  subscriptions Subscription[]
   notifications Notifications[] @relation("Notifications")
-  chatId        String?         @db.ObjectId
-  Chat          Chat?           @relation(fields: [chatId], references: [id])
 
-  createdAt                 DateTime         @default(now())
-  updatedAt                 DateTime         @updatedAt
-  AddToCart                 AddToCart[]      @relation("UserAddToCart")
-  Favourite                 Favourite[]      @relation("UserFavourite")
-  Payment                   Payment[]
-  level                     level[]
-  Otp                       Otp[]
-  PrivateMessage            PrivateMessage[]
-  participant1Conversations Conversation[]   @relation("participant1")
-  participant2Conversations Conversation[]   @relation("participant2")
-  Conversation              Conversation[]
+  AddToCart AddToCart[] @relation("UserAddToCart")
+  Favourite Favourite[] @relation("UserFavourite")
+  level     level[]
+  Otp       Otp[]
+
+  message        Message[]      @relation("UserMessages")
+  conversations  Conversation[] @relation("User1Conversations")
+  conversations2 Conversation[] @relation("User2Conversations")
 
   @@map("users")
 }
@@ -111,47 +114,41 @@ model Otp {
   @@map("otps")
 }
 
-model Conversation {
-  id             String           @id @default(auto()) @map("_id") @db.ObjectId
-  name           String           @unique
-  participant1Id String           @db.ObjectId
-  participant1   User             @relation("participant1", fields: [participant1Id], references: [id])
-  participant2Id String           @db.ObjectId
-  participant2   User             @relation("participant2", fields: [participant2Id], references: [id])
-  messages       PrivateMessage[]
-  User           User?            @relation(fields: [userId], references: [id])
-  userId         String?          @db.ObjectId
-
-  @@map("conversations")
-}
-
-model PrivateMessage {
-  id               String       @id @default(auto()) @map("_id") @db.ObjectId
-  content          String
-  imageUrl         String[]
-  senderId         String       @db.ObjectId
-  sender           User         @relation(fields: [senderId], references: [id])
-  conversationName String
-  conversation     Conversation @relation(fields: [conversationName], references: [name])
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-
-  @@map("private_messages")
-}
-
 model level {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  level     DonorLevel @default(BABYGEEVER)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  userId    String?    @db.ObjectId
-  User      User?      @relation(fields: [userId], references: [id])
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  donationId String     @unique @db.ObjectId
+  donation   Donation   @relation(fields: [donationId], references: [id])
+  level      DonorLevel @default(BABYGEEVER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  userId     String?    @db.ObjectId
+  User       User?      @relation(fields: [userId], references: [id])
 
   @@map("levels")
 }
 
-model antiWasteProduct {
+model SubscriptionPlan {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  priceId      String         @unique // Stripe Price ID
+  Subscription Subscription[]
+}
+
+model Subscription {
+  id                   String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String           @db.ObjectId
+  subscriptionPlanId   String           @db.ObjectId
+  stripeSubscriptionId String           @unique
+  status               String
+  startDate            DateTime
+  endDate              DateTime
+  renewedAt            DateTime?
+  user                 User             @relation(fields: [userId], references: [id])
+  subscriptionPlan     SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+}
+
+model antiWasteDonation {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   Title       String
   Description String?
@@ -164,38 +161,7 @@ model antiWasteProduct {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@map("antiWasteProducts")
-}
-
-model Subscription {
-  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
-  name                 String
-  description          String
-  price                Float
-  discount             Float?
-  startDate            DateTime
-  endDate              DateTime?
-  renewedAt            DateTime?
-  user                 User               @relation(fields: [userId], references: [id])
-  userId               String             @db.ObjectId
-  status               SubscriptionStatus
-  currentPeriodEnd     DateTime
-  stripeSubscriptionId String
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-
-  @@map("subscriptions")
-}
-
-model Payment {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id])
-  amount    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("payments")
+  @@map("antiWasteDonations")
 }
 
 model Notifications {
@@ -213,23 +179,26 @@ model Notifications {
 }
 
 model Donation {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  description  String
-  price        Float
-  quantity     Int
-  productImage String
-  inStock      Int
-  rating       Float?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  description   String
+  donationImage String
+  category      String
+  condition     String
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relationships
-  favorites Favourite[] @relation("ProductFavourite")
+  favorites Favourite[] @relation("DonationFavourite")
+  levelId   String?     @db.ObjectId
+  level     level?
 
-  Review Review[]
+  Review    Review[]
+  Favourite Favourite[]
 
-  @@map("products")
+  @@map("Donations")
 }
 
 model AddToCart {
@@ -248,9 +217,12 @@ model Favourite {
   userId     String?   @db.ObjectId
   donationId String?   @db.ObjectId
   user       User?     @relation(fields: [userId], references: [id], name: "UserFavourite")
-  donation   Donation? @relation(fields: [donationId], references: [id], name: "ProductFavourite")
+  donation   Donation? @relation(fields: [donationId], references: [id], name: "DonationFavourite")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  Donation   Donation? @relation(fields: [donationId], references: [id])
+
+  @@map("favourites")
 }
 
 model Order {
@@ -284,38 +256,36 @@ model Review {
   @@map("reviews")
 }
 
-// model Payment {
-//   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-//   paymentIntentId String?
-//   userId          String?  @db.ObjectId
-//   amount          Float?
-//   customerId      String?
-//   bookingId       String?  @db.ObjectId
-//   paymentMethodId String?
-//   paymentDate     DateTime
-//   user            User?    @relation(fields: [userId], references: [id])
-//   createdAt       DateTime @default(now())
-//   updatedAt       DateTime @updatedAt
-// }
+model Conversation {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  user1Id   String    @db.ObjectId
+  user2Id   String    @db.ObjectId
+  messages  Message[] @relation("ConversationMessages")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-model Message {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  senderId  String   @db.ObjectId
-  sender    User     @relation(fields: [senderId], references: [id], name: "UserMessages")
-  chatId    String   @db.ObjectId
-  content   String
-  createdAt DateTime @default(now())
-  Chat      Chat     @relation(fields: [chatId], references: [id])
+  // Relationships
+  user1 User @relation("User1Conversations", fields: [user1Id], references: [id])
+  user2 User @relation("User2Conversations", fields: [user2Id], references: [id])
 
-  @@map("messages")
+  userId String? @db.ObjectId
+
+  @@map("conversations")
 }
 
-model Chat {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  name      String?
-  createdAt DateTime  @default(now())
-  User      User[]
-  Message   Message[]
+model Message {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String   @db.ObjectId
+  senderId       String   @db.ObjectId
+  receiverId     String   @db.ObjectId
+  content        String
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  @@map("chats")
+  // Relationships
+  sender       User         @relation("UserMessages", fields: [senderId], references: [id])
+  conversation Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
+
+  @@map("messages")
 }

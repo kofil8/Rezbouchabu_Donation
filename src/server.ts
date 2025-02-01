@@ -1,155 +1,183 @@
 import { Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 import app from "./app";
+import { chatServices } from "./app/modules/chat/chat.services";
 import config from "./config";
-import { PrismaClient } from "@prisma/client";
-import { privateMessageService } from "./app/modules/privateMessage/privateMessage.service";
-import httpStatus from "http-status";
-import fs from "fs";
-import path from "path";
-import ApiError from "./errors/ApiErrors";
 
-const prisma = new PrismaClient();
-let wss: WebSocketServer;
-const channelClients = new Map<string, Set<WebSocket>>();
+import { notificationServices } from "./app/modules/notifications/notification.service";
+import prisma from "./shared/prisma";
+import seedSuperAdmin from "./app/DB";
 
-function broadcastToChannel(
-  channelId: string,
-  data: any,
-  excludeSocket: WebSocket | null = null
-) {
-  const clients = channelClients.get(channelId);
-  if (clients) {
-    clients.forEach((client) => {
-      if (excludeSocket !== client && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(data));
-      }
-    });
-  }
+interface ExtendedWebSocket extends WebSocket {
+  roomId?: string;
+  userId?: string;
 }
+
+const port = config.port || 5000;
+
 async function main() {
-  const server: Server = app.listen(config.port, () => {
-    console.log("Server running on port", config.port);
+  const server: Server = app.listen(port, () => {
+    console.log("Server is running on port ", port);
   });
+  seedSuperAdmin();
+  const activeUsers: Map<string, boolean> = new Map();
 
-  // new WebSocket server
-  wss = new WebSocketServer({ server });
+  // Initialize WebSocket server
+  const wss = new WebSocketServer({ server });
 
-  // client handle connection
-  wss.on("connection", (ws) => {
-    console.log("New WebSocket connection!");
+  wss.on("connection", (ws: ExtendedWebSocket) => {
+    console.log("New client connected");
 
-    let channelId: string | null = null;
-    // client received message
-    ws.on("message", async (message) => {
+    // Handle incoming messages
+    ws.on("message", async (data: string) => {
       try {
-        const parsed = JSON.parse(message.toString());
-        if (parsed.type === "subscribePrivate" && parsed.channelName) {
-          channelId = parsed.channelName;
-          if (!channelId) {
-            throw new ApiError(httpStatus.BAD_REQUEST, "Invalid channel Id.");
-          }
-          const prevMessages = await prisma.privateMessage.findMany({
-            where: { conversationName: channelId },
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  profileImage: true,
-                },
-              },
-            },
-          });
-          if (channelId && !channelClients.has(channelId)) {
-            channelClients.set(channelId, new Set());
-          }
-          channelId && channelClients.get(channelId)?.add(ws);
-          ws.send(
-            JSON.stringify({
-              type: "subscribed",
-              channelId,
-              loadedMessages: prevMessages,
-            })
-          );
-        } else if (parsed.type === "privateMessage") {
-          const channelId = parsed.channelName;
-          const message = parsed.data;
+        const parsedData = JSON.parse(data);
 
-          if (message.image) {
-            const base64Image = message.image;
-            const filename = `${Date.now()}.jpeg`;
-            const base64Data = base64Image.replace(
-              /^data:image\/\w+;base64,/,
-              ""
+        switch (parsedData.type) {
+          case "joinRoom": {
+            const { user1Id, user2Id } = parsedData;
+
+            ws.userId = user1Id;
+            activeUsers.set(user1Id, true);
+
+            console.log(`User ${user1Id} is now active`);
+
+            // Create or get the conversation
+            const conversation = await chatServices.createConversationIntoDB(
+              user1Id,
+              user2Id
             );
-            const uploadDir = path.join(process.cwd(), `uploads/message`);
-            if (!fs.existsSync(uploadDir)) {
-              fs.mkdirSync(uploadDir, { recursive: true });
-            }
-            const filePath = path.join(uploadDir, filename);
-            const localFilePath = `{}uploads/message/${filename}`;
-            message.imageUrl = [localFilePath];
-            const buffer = Buffer.from(base64Data, "base64");
+            ws.roomId = conversation.id;
 
-            fs.writeFile(filePath, buffer, (err) => {
-              if (err) {
-                console.error("Error saving image:", err);
-                ws.send(
+            const unreadCount = await chatServices.countUnreadMessages(
+              user1Id,
+              ws.roomId
+            );
+
+            const conversationWithMessages =
+              await chatServices.getMessagesByConversationIntoDB(
+                user1Id,
+                user2Id
+              );
+            ws.send(
+              JSON.stringify({
+                type: "loadMessages",
+                conversation: conversationWithMessages,
+                unreadCount,
+              })
+            );
+            break;
+          }
+
+          case "sendMessage": {
+            const { chatroomId, senderId, receiverId, content } = parsedData;
+
+            const message = await chatServices.createMessageIntoDB(
+              chatroomId,
+              senderId,
+              receiverId,
+              content
+            );
+
+            ws.send(
+              JSON.stringify({
+                type: "messageSent",
+                message,
+              })
+            );
+
+            wss.clients.forEach((client: ExtendedWebSocket) => {
+              if (client.roomId === chatroomId && client.readyState === 1) {
+                client.send(
                   JSON.stringify({
-                    type: "error",
-                    message: "Failed to save image",
-                  })
-                );
-              } else {
-                console.log("Image saved successfully at", filePath);
-                ws.send(
-                  JSON.stringify({
-                    type: "image",
-                    message: "Image saved successfully",
+                    type: "receiveMessage",
+                    message,
                   })
                 );
               }
             });
-          }
-          const createdMessage =
-            await privateMessageService.createPrivateMessage(
-              { content: message.content, imageUrl: message.imageUrl },
-              message.senderId,
-              message.receiverId
+
+            const unreadCount = await chatServices.countUnreadMessages(
+              receiverId,
+              chatroomId
             );
-          const newMessage = await prisma.privateMessage.findFirst({
-            where: { id: createdMessage.newMessage.id },
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  profileImage: true,
-                },
-              },
-            },
-          });
-          broadcastToChannel(channelId, newMessage);
-        } else if (
-          parsed.type === "offer" ||
-          parsed.type === "answer" ||
-          parsed.type === "candidate"
-        ) {
-          broadcastToChannel(parsed.channelName, parsed, ws);
+
+            wss.clients.forEach((client: ExtendedWebSocket) => {
+              if (client.userId === receiverId && client.readyState === 1) {
+                client.send(
+                  JSON.stringify({
+                    type: "unreadCount",
+                    unreadCount,
+                  })
+                );
+              }
+            });
+
+            const isReceiverActive = Array.from(wss.clients).some(
+              (client: ExtendedWebSocket) =>
+                client.userId === receiverId && client.readyState === 1
+            );
+
+            if (!isReceiverActive) {
+              const senderProfile = await prisma.user.findUnique({
+                where: { id: senderId },
+                select: { email: true },
+              });
+
+              const notificationData = {
+                title: "New Message Received!",
+                body: `${
+                  senderProfile?.email || "Someone"
+                } has sent you a new message.`,
+              };
+
+              try {
+                await notificationServices.sendSingleNotification({
+                  params: { userId: receiverId },
+                  body: notificationData,
+                });
+              } catch (error: any) {
+                console.error("Failed to send notification:", error.message);
+              }
+            }
+
+            break;
+          }
+
+          case "viewMessages": {
+            const { chatroomId, userId } = parsedData;
+
+            // Mark messages as read when the user views the chat
+            await chatServices.markMessagesAsRead(userId, chatroomId);
+
+            // Optionally, send the updated unread count after marking as read
+            const unreadCount = await chatServices.countUnreadMessages(
+              userId,
+              chatroomId
+            );
+            ws.send(
+              JSON.stringify({
+                type: "unreadCount",
+                unreadCount,
+              })
+            );
+            break;
+          }
+          default: {
+            console.log("Unknown message type:", parsedData.type);
+          }
         }
-      } catch (err: any) {
-        console.error("error:", err.message);
+      } catch (error) {
+        console.error("Error handling WebSocket message:", error);
       }
     });
+
+    // Handle WebSocket disconnect
     ws.on("close", () => {
-      if (channelId) {
-        channelClients.get(channelId)?.delete(ws);
-        if (channelClients.get(channelId)?.size === 0) {
-          channelClients.delete(channelId);
-        }
+      if (ws.userId) {
+        activeUsers.set(ws.userId, false); // Mark the user as inactive
+        console.log(`User ${ws.userId} is now inactive`);
       }
-      console.log("Client disconnected!");
     });
   });
 }

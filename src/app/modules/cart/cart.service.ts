@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
-import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
+import prisma from "../../../shared/prisma";
 
 const addToCart = async (userId: string, payload: any) => {
   const result = await prisma.addToCart.create({
@@ -18,35 +18,35 @@ const getMyCartList = async (userId: string) => {
       userId: userId,
     },
     include: {
-      product: true,
+      Donation: true,
     },
   });
 
-  // // Map the results to include only the necessary product details
+  // // Map the results to include only the necessary Donation details
   // const favourites = result.map((item) => ({
-  //   productImage: item?.product?.productImage,
-  //   name: item?.product?.name,
-  //   price: item?.product?.price,
+  //   DonationImage: item?.Donation?.DonationImage,
+  //   name: item?.Donation?.name,
+  //   price: item?.Donation?.price,
   // }));
 
   return result;
 };
 
-const removeProductFromCart = async (userId: string, productId: string) => {
+const removeDonationFromCart = async (userId: string, DonationId: string) => {
   const existingFavourite = await prisma.addToCart.findFirst({
     where: {
-      id: productId,
+      id: DonationId,
     },
   });
 
   if (!existingFavourite) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
   }
 
   const result = await prisma.addToCart.delete({
     where: {
       userId: userId,
-      id: productId,
+      id: DonationId,
     },
   });
   return;
@@ -55,5 +55,5 @@ const removeProductFromCart = async (userId: string, productId: string) => {
 export const CartServices = {
   addToCart,
   getMyCartList,
-  removeProductFromCart,
+  removeDonationFromCart,
 };

@@ -2,8 +2,8 @@ import z from "zod";
 
 const addToCart = z.object({
   body: z.object({
-    productId: z.string({
-      required_error: "Product id is required!",
+    DonationId: z.string({
+      required_error: "Donation id is required!",
     }),
     quantity: z.number({
       required_error: "Quantity is required!",

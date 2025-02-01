@@ -1,24 +1,20 @@
 import express from "express";
 import auth from "../../middlewares/auth";
-import { Role } from "@prisma/client";
 import { fileUploader } from "../../../helpars/fileUploaderS3";
 import { ProfileControllers } from "./profile.controller";
 
 const router = express.Router();
 
-// // update user first name and last name
-// router.put(
-//   "/update",
-//   auth(),
-//   // validateRequest(userValidation.createUserSchema),
-//   ProfileControllers.updateUser
-// );
-
-router.patch(
-  "/profile-img-update/:id",
-  auth(),
+router.get(
+  "/me",
+  auth("DONOR", "ADMIN", "SELLER"),
+  ProfileControllers.getMyProfile
+);
+router.put(
+  "/update",
+  auth("DONOR", "ADMIN", "SELLER"),
   fileUploader.uploadProfileImage,
-  ProfileControllers.updateUserProfileImage
+  ProfileControllers.updateMyProfile
 );
 
-export const UserRoute = router;
+export const ProfileRouters = router;

@@ -1,12 +1,12 @@
 import httpStatus from "http-status";
-import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
+import prisma from "../../../shared/prisma";
 
-const addToFavourite = async (userId: string, productId: string) => {
+const addToFavourite = async (userId: string, DonationId: string) => {
   const result = await prisma.favourite.create({
     data: {
       userId: userId,
-      productId: productId,
+      DonationId: DonationId,
     },
   });
   return result;
@@ -18,24 +18,24 @@ const getMyFavourite = async (userId: string) => {
       userId: userId,
     },
     include: {
-      product: true,
+      Donation: true,
     },
   });
 
-  // Map the results to include only the necessary product details
+  // Map the results to include only the necessary Donation details
   const favourites = result.map((item) => ({
-    productImage: item?.product?.productImage,
-    name: item?.product?.name,
-    price: item?.product?.price,
+    DonationImage: item?.Donation?.DonationImage,
+    name: item?.Donation?.name,
+    price: item?.Donation?.price,
   }));
 
   return favourites;
 };
 
-const removeFromFavourite = async (userId: string, productId: string) => {
+const removeFromFavourite = async (userId: string, DonationId: string) => {
   const existingFavourite = await prisma.favourite.findFirst({
     where: {
-      id: productId,
+      id: DonationId,
     },
   });
 
@@ -46,7 +46,7 @@ const removeFromFavourite = async (userId: string, productId: string) => {
   const result = await prisma.favourite.deleteMany({
     where: {
       userId: userId,
-      id: productId,
+      id: DonationId,
     },
   });
   return;

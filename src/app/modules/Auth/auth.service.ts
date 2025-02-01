@@ -30,6 +30,17 @@ const loginUserFromDB = async (payload: {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid credentials");
   }
 
+  if (userData.isOnline === false) {
+    await prisma.user.update({
+      where: {
+        email: payload.email,
+      },
+      data: {
+        isOnline: true,
+      },
+    });
+  }
+
   if (payload?.fcmToken) {
     await prisma.user.update({
       where: {
@@ -47,6 +58,7 @@ const loginUserFromDB = async (payload: {
       email: userData.email as string,
       role: userData.role,
       fcmToken: userData.fcmToken,
+      isOnline: userData.isOnline,
     },
     config.jwt.jwt_secret as Secret,
     config.jwt.expires_in as string
@@ -55,6 +67,7 @@ const loginUserFromDB = async (payload: {
     accessToken,
     id: userData.id,
     email: userData.email,
+    fullName: userData.fullName,
     role: userData.role,
   };
 };

@@ -1,37 +1,37 @@
-import fs from 'fs';
-import multer from 'multer';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import slugify from '../utils/slugify';
+import fs from "fs";
+import multer from "multer";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import slugify from "../utils/slugify";
 // import slugify from "../utils/slugify";
 
 export const fileFilter = (req: any, file: any, cb: any) => {
   const allowedMimeTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/bmp',
-    'image/tiff',
-    'image/webp',
-    'audio/mpeg',
-    'video/mp4',
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/bmp",
+    "image/tiff",
+    "image/webp",
+    "audio/mpeg",
+    "video/mp4",
   ];
 
   if (
     allowedMimeTypes.includes(file.mimetype) ||
-    file.mimetype.startsWith('image/')
+    file.mimetype.startsWith("image/")
   ) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type'), false);
+    cb(new Error("Invalid file type"), false);
   }
 };
 
 // local file storage
 export const createStorage = (folder?: string) => {
   const uploadFolder = folder
-    ? path.join(process.cwd(), 'uploads', folder)
-    : path.join(process.cwd(), 'uploads');
+    ? path.join(process.cwd(), "uploads", folder)
+    : path.join(process.cwd(), "uploads");
 
   if (!fs.existsSync(uploadFolder)) {
     fs.mkdirSync(uploadFolder, { recursive: true });
@@ -58,15 +58,21 @@ export const createStorage = (folder?: string) => {
 
 // Upload messageImages
 const uploadMessageImages = multer({
-  storage: createStorage('messages'),
+  storage: createStorage("messages"),
   fileFilter: fileFilter,
-}).fields([{ name: 'messageImages', maxCount: 10 }]);
+}).fields([{ name: "messageImages", maxCount: 10 }]);
 
 // File uploader for profile images
 const uploadProfileImage = multer({
-  storage: createStorage('profile'),
+  storage: createStorage("profile"),
   fileFilter: fileFilter,
-}).single('profileImage');
+}).single("profileImage");
+
+// File uploader for donation images
+const uploadDonationImage = multer({
+  storage: createStorage("donation"),
+  fileFilter: fileFilter,
+}).single("donationImage");
 
 const upload = multer({
   storage: createStorage(),
@@ -77,4 +83,5 @@ export const fileUploader = {
   upload,
   uploadProfileImage,
   uploadMessageImages,
+  uploadDonationImage,
 };

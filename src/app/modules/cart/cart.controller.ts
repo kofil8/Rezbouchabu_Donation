@@ -1,8 +1,8 @@
-import httpStatus from "http-status";
 import { Request, Response } from "express";
-import { CartServices } from "./cart.service";
+import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
+import { CartServices } from "./cart.service";
 
 const addToCart = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
@@ -11,7 +11,7 @@ const addToCart = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    message: "Product added to cart successfully",
+    message: "Donation added to cart successfully",
     data: result,
   });
 });
@@ -27,15 +27,18 @@ const getMyCartList = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const removeProductFromCart = catchAsync(
+const removeDonationFromCart = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
-    const productId = req.params.productId;
-    const result = await CartServices.removeProductFromCart(userId, productId);
+    const DonationId = req.params.DonationId;
+    const result = await CartServices.removeDonationFromCart(
+      userId,
+      DonationId
+    );
 
     sendResponse(res, {
       statusCode: httpStatus.OK,
-      message: "Product removed from cart successfully",
+      message: "Donation removed from cart successfully",
       data: result,
     });
   }
@@ -44,5 +47,5 @@ const removeProductFromCart = catchAsync(
 export const CartControllers = {
   addToCart,
   getMyCartList,
-  removeProductFromCart,
+  removeDonationFromCart,
 };

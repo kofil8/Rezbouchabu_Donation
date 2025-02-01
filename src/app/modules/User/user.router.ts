@@ -3,8 +3,6 @@ import auth from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import { UserValidations } from "./user.validation";
 import { UserControllers } from "./user.controller";
-import parseBodyData from "../../../helpars/parseBodyData";
-import { fileUploader } from "../../../helpars/fileUploaderS3";
 
 const router = express.Router();
 
@@ -18,16 +16,7 @@ router.post(
 
 router.get("/", UserControllers.getAllUsers);
 
-router.get("/me", auth("DONOR", "ADMIN"), UserControllers.getMyProfile);
-
 router.get("/:id", auth(), UserControllers.getUserDetails);
-router.put(
-  "/update-profile",
-  auth("DONOR", "ADMIN"),
-  fileUploader.uploadProfileImage,
-  parseBodyData,
-  UserControllers.updateMyProfile
-);
 
 router.delete("/:id", auth("ADMIN"), UserControllers.deleteUser);
 
