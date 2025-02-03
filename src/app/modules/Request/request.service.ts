@@ -1,6 +1,8 @@
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
+import logger from "../../../utils/logger";
+import { category } from "@prisma/client";
 
 const createRequestIntoDB = async (id: string, payload: any) => {
   const existingUser = await prisma.user.findUnique({
@@ -12,7 +14,13 @@ const createRequestIntoDB = async (id: string, payload: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  console.log(existingUser.id);
+  if (payload.category === category.Food) {
+    payload.subcategory = null;
+  }
+
+  logger.info(
+    "Category: " + payload.category + " Subcategory: " + payload.subcategory
+  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {

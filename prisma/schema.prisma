@@ -17,7 +17,7 @@ enum Role {
   ADMIN
   SELLER
   DONOR
-  RECEIVER
+  ADOPTER
 }
 
 enum NotificationType {
@@ -55,6 +55,17 @@ enum SubscriptionPlanType {
   MONTHLY
   YEARLY
 }
+
+// CATEGORIES
+
+enum category {
+  Food
+  Object
+}
+
+// ---------------------------------------------------------
+//  MODELS
+// ---------------------------------------------------------
 
 model User {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -183,7 +194,7 @@ model Donation {
   name           String
   description    String
   donationImages Json[]
-  category       String?
+  category       category
   subcategory    String?
   condition      String?
   latitude       Float?
@@ -206,7 +217,7 @@ model Requests {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  category    String?
+  category    category
   subcategory String?
   latitude    Float?
   longitude   Float?

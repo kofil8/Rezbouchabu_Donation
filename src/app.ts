@@ -7,9 +7,10 @@ import bodyParser from "body-parser";
 import router from "./app/routes";
 import GlobalErrorHandler from "./app/middlewares/globalErrorHandler";
 import morgan from "morgan";
-import fs from "fs";
+import logger from "./utils/logger";
 
 const app: Application = express();
+const morganFormat = ":method :url :status :response-time ms";
 
 export const corsOptions = {
   origin: ["*"],
@@ -19,23 +20,28 @@ export const corsOptions = {
 };
 
 // Middleware setup
-
 app.use(express.json());
-
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Create a write stream for logging
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, "access.log"),
-  { flags: "a" }
+app.use(
+  morgan(morganFormat, {
+    stream: {
+      write: (message) => {
+        const logObject = {
+          method: message.split(" ")[0],
+          url: message.split(" ")[1],
+          status: message.split(" ")[2],
+          responseTime: message.split(" ")[3],
+        };
+        logger.info(JSON.stringify(logObject));
+      },
+    },
+  })
 );
-
-// Use morgan to log requests in 'combined' format to the file
-app.use(morgan("dev", { stream: accessLogStream }));
 
 // app.use("/uploads", express.static(path.join("/var/www/uploads")));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads"))); // Serve static files from the "uploads" directory

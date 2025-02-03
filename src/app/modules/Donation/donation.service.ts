@@ -2,6 +2,9 @@ import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import config from "../../../config";
 import httpStatus from "http-status";
+import e from "express";
+import logger from "../../../utils/logger";
+import { category } from "@prisma/client";
 
 const createDonationIntoDB = async (id: string, payload: any, files: any) => {
   const existingUser = await prisma.user.findUnique({
@@ -20,6 +23,14 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
           : ""
       )
     : [];
+
+  if (payload.category === category.Food) {
+    payload.subcategory = null;
+  }
+
+  logger.info(
+    "Category: " + payload.category + " Subcategory: " + payload.subcategory
+  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -111,6 +122,13 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
           : ""
       )
     : [];
+
+  if (payload.category === category.Food) {
+    payload.subcategory = null;
+  }
+  logger.info(
+    "Category: " + payload.category + " Subcategory: " + payload.subcategory
+  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
