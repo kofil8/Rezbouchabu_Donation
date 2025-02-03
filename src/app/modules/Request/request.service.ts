@@ -1,9 +1,8 @@
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
-import config from "../../../config";
 import httpStatus from "http-status";
 
-const createDonationIntoDB = async (id: string, payload: any, files: any) => {
+const createRequestIntoDB = async (id: string, payload: any) => {
   const existingUser = await prisma.user.findUnique({
     where: { id: id },
     select: { id: true },
@@ -13,13 +12,7 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  const imageURL = files?.donationImages
-    ? files.donationImages.map((file: any) =>
-        file.originalname
-          ? `${config.backend_image_url}/uploads/${file.originalname}`
-          : ""
-      )
-    : [];
+  console.log(existingUser.id);
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -32,44 +25,39 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
 
   const userId = existingUser.id;
 
-  const donation = await prisma.donation.create({
+  const request = await prisma.requests.create({
     data: {
       userId,
       ...parsedPayload,
-      donationImages: imageURL,
     },
     select: {
       id: true,
       userId: true,
       name: true,
       description: true,
-      donationImages: true,
       category: true,
       subcategory: true,
       latitude: true,
       longitude: true,
-      condition: true,
       createdAt: true,
       updatedAt: true,
     },
   });
 
-  return donation;
+  return request;
 };
 
-const getAllDonationsFromDB = async () => {
-  const result = await prisma.donation.findMany({
+const getAllRequestsFromDB = async () => {
+  const result = await prisma.requests.findMany({
     select: {
       id: true,
       userId: true,
       name: true,
       description: true,
-      donationImages: true,
       latitude: true,
       longitude: true,
       category: true,
       subcategory: true,
-      condition: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -77,21 +65,20 @@ const getAllDonationsFromDB = async () => {
   return result;
 };
 
-const getSingleDonationFromDB = async (id: string) => {
-  const result = await prisma.donation.findUnique({
+const getSingleRequestFromDB = async (id: string) => {
+  const result = await prisma.requests.findUnique({
     where: {
       id,
     },
   });
   if (!result) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Request not found");
   }
   return result;
 };
 
-const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
-  console.log(id);
-  const existingDonation = await prisma.donation.findUnique({
+const updateRequestIntoDB = async (id: string, payload: any) => {
+  const existingDonation = await prisma.requests.findUnique({
     where: {
       id,
     },
@@ -101,16 +88,8 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
   });
 
   if (!existingDonation) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Request not found");
   }
-
-  const imageURL = files?.donationImages
-    ? files.donationImages.map((file: any) =>
-        file.originalname
-          ? `${config.backend_image_url}/uploads/${file.originalname}`
-          : ""
-      )
-    : [];
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -120,25 +99,22 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
     }
   }
-  const donation = await prisma.donation.update({
+  const donation = await prisma.requests.update({
     where: {
       id,
     },
     data: {
       ...parsedPayload,
-      donationImages: imageURL,
     },
     select: {
       id: true,
       userId: true,
       name: true,
       description: true,
-      donationImages: true,
       latitude: true,
       longitude: true,
       category: true,
       subcategory: true,
-      condition: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -146,29 +122,29 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
   return donation;
 };
 
-const deleteDonationIntoDB = async (id: string) => {
-  const existingDonation = await prisma.donation.findUnique({
+const deleteRequestIntoDB = async (id: string) => {
+  const existingDonation = await prisma.requests.findUnique({
     where: {
       id,
     },
   });
 
   if (!existingDonation) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Request not found");
   }
 
-  const donation = await prisma.donation.delete({
+  const request = await prisma.requests.delete({
     where: {
       id,
     },
   });
-  return donation;
+  return request;
 };
 
-export const DonationServices = {
-  createDonationIntoDB,
-  getAllDonationsFromDB,
-  getSingleDonationFromDB,
-  updateDonationIntoDB,
-  deleteDonationIntoDB,
+export const RequestServices = {
+  createRequestIntoDB,
+  getAllRequestsFromDB,
+  getSingleRequestFromDB,
+  updateRequestIntoDB,
+  deleteRequestIntoDB,
 };

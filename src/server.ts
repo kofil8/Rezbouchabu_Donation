@@ -3,7 +3,6 @@ import { WebSocket, WebSocketServer } from "ws";
 import app from "./app";
 import { chatServices } from "./app/modules/chat/chat.services";
 import config from "./config";
-
 import { notificationServices } from "./app/modules/notifications/notification.service";
 import prisma from "./shared/prisma";
 import seedSuperAdmin from "./app/DB";
@@ -19,7 +18,8 @@ async function main() {
   const server: Server = app.listen(port, () => {
     console.log("Server is running on port ", port);
   });
-  seedSuperAdmin();
+
+  await seedSuperAdmin();
   const activeUsers: Map<string, boolean> = new Map();
 
   const wss = new WebSocketServer({ server });

@@ -7,21 +7,13 @@ const router = express.Router();
 
 router.post(
   "/",
-  auth("BUSINESS", "ADMIN"),
+  auth(),
   validateRequest(CartValidations.addToCart),
   CartControllers.addToCart
 );
 
-router.get(
-  "/",
-  auth("USER", "ADMIN", "BUSINESS"),
-  CartControllers.getMyCartList
-);
+router.get("/", auth(), CartControllers.getMyCartList);
 
-router.delete(
-  "/:DonationId",
-  auth("BUSINESS", "ADMIN"),
-  CartControllers.removeDonationFromCart
-);
+router.delete("/:id", auth(), CartControllers.removeDonationFromCart);
 
 export const CartRouters = router;

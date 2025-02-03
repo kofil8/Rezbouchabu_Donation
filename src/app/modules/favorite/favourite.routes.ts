@@ -4,17 +4,28 @@ import { FavouriteControllers } from "./favourite.controller";
 const router = express.Router();
 
 router.post(
-  "/:DonationId",
-  auth("DONOR", "ADMIN"),
-  FavouriteControllers.addToFavourite
+  "/donations/:donationId",
+  auth(),
+  FavouriteControllers.addToFavouriteDonation
+);
+router.post(
+  "/requests/:requestId",
+  auth(),
+  FavouriteControllers.addToFavouriteRequest
 );
 
-router.get("/", auth("DONOR", "ADMIN"), FavouriteControllers.getMyFavourite);
+router.get("/donations/", auth(), FavouriteControllers.getMyFavouriteDonation);
+router.get("/requests/", auth(), FavouriteControllers.getMyFavouriteRequest);
 
 router.delete(
-  "/:DonationId",
-  auth("DONOR", "ADMIN"),
-  FavouriteControllers.removeFromFavourite
+  "/donations/:donationId",
+  auth(),
+  FavouriteControllers.removeFromFavouriteDonation
+);
+router.delete(
+  "/requests/:requestId",
+  auth(),
+  FavouriteControllers.removeFromFavouriteRequest
 );
 
 export const FavouriteRouters = router;

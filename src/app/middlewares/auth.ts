@@ -1,12 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-
 import { JwtPayload, Secret } from "jsonwebtoken";
 import config from "../../config";
-
 import httpStatus from "http-status";
-
 import prisma from "../../shared/prisma";
-
 import ApiError from "../../errors/ApiErrors";
 import { jwtHelpers } from "../../helpars/jwtHelpers";
 

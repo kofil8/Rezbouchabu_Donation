@@ -6,6 +6,8 @@ import { NotificationsRouters } from "../modules/notifications/notification.rout
 import { ChatRouters } from "../modules/chat/chat.route";
 import { DonationRouters } from "../modules/Donation/donation.routes";
 import { ProfileRouters } from "../modules/Profile/profile.router";
+import { RequestRouters } from "../modules/Request/request.router";
+import { FavouriteRouters } from "../modules/favorite/favourite.routes";
 
 const router = express.Router();
 
@@ -23,6 +25,10 @@ const moduleRoutes = [
     route: ProfileRouters,
   },
   {
+    path: "/favourites",
+    route: FavouriteRouters,
+  },
+  {
     path: "/reviews",
     route: ReviewRouters,
   },
@@ -37,6 +43,10 @@ const moduleRoutes = [
   {
     path: "/donations",
     route: DonationRouters,
+  },
+  {
+    path: "/requests",
+    route: RequestRouters,
   },
 ];
 

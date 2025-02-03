@@ -12,6 +12,7 @@ const superAdminData = {
 };
 
 const seedSuperAdmin = async () => {
+  let superAdmin;
   try {
     // Check if a super admin already exists
     const isSuperAdminExists = await prisma.user.findFirst({
@@ -21,21 +22,28 @@ const seedSuperAdmin = async () => {
     });
 
     // If not, create one
-    if (!isSuperAdminExists) {
+    if (isSuperAdminExists === null) {
       superAdminData.password = await bcrypt.hash(
         config.super_admin_password as string,
         Number(config.salt) || 12
       );
-      await prisma.user.create({
+
+      superAdmin = await prisma.user.create({
         data: superAdminData,
       });
-      console.log("Super Admin created successfully.");
+
+      if (!superAdmin) {
+        throw new Error("Failed to create Super Admin");
+      }
+      console.log("Super Admin created:", superAdmin);
     } else {
-      return;
+      console.log("Super Admin already exists");
     }
   } catch (error) {
     console.error("Error seeding Super Admin:", error);
   }
+
+  return superAdmin;
 };
 
 export default seedSuperAdmin;

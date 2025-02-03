@@ -13,12 +13,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// upload single image
 const uploadprofileImage = upload.single("profileImage");
+const uploadDonationImages = upload.fields([
+  { name: "donationImages", maxCount: 10 },
+]);
 const uploadPostImage = upload.single("postImage");
 
 export const fileUploader = {
   upload,
+  uploadDonationImages,
   uploadprofileImage,
   uploadPostImage,
 };

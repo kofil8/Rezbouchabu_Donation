@@ -7,12 +7,16 @@ import { DonationServices } from "./donation.service";
 const createDonation = catchAsync(async (req: Request, res: Response) => {
   const id = req.user.id;
   const payload = req.body.bodyData;
-  const file = req.file as any;
-  const result = await DonationServices.createDonationIntoDB(id, payload, file);
+  const files = req.files as any;
+  const result = await DonationServices.createDonationIntoDB(
+    id,
+    payload,
+    files
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    message: "Donation registered successfully",
+    message: "Donation created successfully",
     data: result,
   });
 });
@@ -41,8 +45,12 @@ const getSingleDonation = catchAsync(async (req: Request, res: Response) => {
 const updateDonation = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const payload = req.body.bodyData;
-  const file = req.file as any;
-  const result = await DonationServices.updateDonationIntoDB(id, payload, file);
+  const files = req.files as any;
+  const result = await DonationServices.updateDonationIntoDB(
+    id,
+    payload,
+    files
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

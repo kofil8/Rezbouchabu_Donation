@@ -1,21 +1,21 @@
 import express from "express";
 import auth from "../../middlewares/auth";
-import { fileUploader } from "../../../helpars/fileUploaderS3";
 import { ProfileControllers } from "./profile.controller";
 import parseBodyData from "../../../helpars/parseBodyData";
+import { fileUploader } from "../../../helpars/fileUploader";
 
 const router = express.Router();
 
 router.get(
   "/me",
-  auth("DONOR", "ADMIN", "SELLER"),
+  auth("DONOR", "ADMIN", "SELLER", "RECEIVER"),
   ProfileControllers.getMyProfile
 );
-router.put(
+router.patch(
   "/update",
-  auth("DONOR", "ADMIN", "SELLER"),
+  auth("DONOR", "ADMIN", "SELLER", "RECEIVER"),
   parseBodyData,
-  fileUploader.uploadProfileImage,
+  fileUploader.uploadprofileImage,
   ProfileControllers.updateMyProfile
 );
 

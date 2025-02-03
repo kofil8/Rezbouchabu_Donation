@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import slugify from "../utils/slugify";
 // import slugify from "../utils/slugify";
 
-export const fileFilter = (req: any, file: any, cb: any) => {
+export const fileFilter = (_req: any, file: any, cb: any) => {
   const allowedMimeTypes = [
     "image/jpeg",
     "image/png",
@@ -38,10 +38,10 @@ export const createStorage = (folder?: string) => {
   }
 
   return multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: function (_req, _file, cb) {
       cb(null, uploadFolder);
     },
-    filename: function (req, file, cb) {
+    filename: function (_req, file, cb) {
       const uniqueSuffix = `${uuidv4()}-${Date.now()}`;
       const fileExtension = path.extname(file.originalname);
 
@@ -68,11 +68,15 @@ const uploadProfileImage = multer({
   fileFilter: fileFilter,
 }).single("profileImage");
 
-// File uploader for donation images
-const uploadDonationImage = multer({
-  storage: createStorage("donation"),
+const uploadSingleDonationeImage = multer({
+  storage: createStorage("donations"),
   fileFilter: fileFilter,
 }).single("donationImage");
+
+const uploadDonationsImages = multer({
+  storage: createStorage("donations"),
+  fileFilter: fileFilter,
+}).array("donationImages", 10);
 
 const upload = multer({
   storage: createStorage(),
@@ -83,5 +87,6 @@ export const fileUploader = {
   upload,
   uploadProfileImage,
   uploadMessageImages,
-  uploadDonationImage,
+  uploadDonationsImages,
+  uploadSingleDonationeImage,
 };

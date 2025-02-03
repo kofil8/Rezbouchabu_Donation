@@ -86,18 +86,18 @@ model User {
   subscriptions    Subscription[]
 
   donations     Donation[]      @relation
+  requests      Requests[]      @relation
+  favorites     Favourite[]     @relation
   reviews       Review[]        @relation
   notifications Notifications[] @relation("Notifications")
 
   AddToCart AddToCart[] @relation("UserAddToCart")
-  Favourite Favourite[] @relation("UserFavourite")
   level     level[]
   Otp       Otp[]
 
   message        Message[]      @relation("UserMessages")
   conversations  Conversation[] @relation("User1Conversations")
   conversations2 Conversation[] @relation("User2Conversations")
-  Order          Order[]
 
   @@map("users")
 }
@@ -117,15 +117,13 @@ model Otp {
 }
 
 model level {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  donationId String     @unique @db.ObjectId
-  donation   Donation   @relation(fields: [donationId], references: [id])
-  level      DonorLevel @default(BABYGEEVER)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  userId     String?    @db.ObjectId
-  User       User?      @relation(fields: [userId], references: [id])
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  level     DonorLevel @default(BABYGEEVER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String     @db.ObjectId
+  User      User       @relation(fields: [userId], references: [id])
 
   @@map("levels")
 }
@@ -181,28 +179,47 @@ model Notifications {
 }
 
 model Donation {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  description   String
-  donationImage String?
-  category      String?
-  condition     String?
-  latitude      Float?
-  longitude     Float?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String
+  donationImages Json[]
+  category       String?
+  subcategory    String?
+  condition      String?
+  latitude       Float?
+  longitude      Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relationships
   favorites Favourite[] @relation("DonationFavourite")
-  levelId   String?     @db.ObjectId
-  level     level?
 
-  Review    Review[]
-  Favourite Favourite[]
-  User      User?       @relation(fields: [userId], references: [id])
-  userId    String?     @db.ObjectId
+  Review Review[]
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
 
   @@map("donations")
+}
+
+model Requests {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  category    String?
+  subcategory String?
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  favorites Favourite[] @relation("RequestFavourite")
+
+  Review Review[]
+  User   User     @relation(fields: [userId], references: [id])
+  userId String   @db.ObjectId
+
+  @@map("requests")
 }
 
 model AddToCart {
@@ -220,30 +237,32 @@ model Favourite {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   userId     String?   @db.ObjectId
   donationId String?   @db.ObjectId
-  user       User?     @relation(fields: [userId], references: [id], name: "UserFavourite")
+  requestId  String?   @db.ObjectId
+  user       User?     @relation(fields: [userId], references: [id])
   donation   Donation? @relation(fields: [donationId], references: [id], name: "DonationFavourite")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Donation   Donation? @relation(fields: [donationId], references: [id])
+  request    Requests? @relation(fields: [requestId], references: [id], name: "RequestFavourite")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("favourites")
 }
 
-model Order {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String @db.ObjectId
-  user       User   @relation(fields: [userId], references: [id])
-  businessId String @db.ObjectId
-  donationId String @db.ObjectId
-  quantity   Int
-  total      Float
+// model Order {
+//   id         String @id @default(auto()) @map("_id") @db.ObjectId
+//   userId     String @db.ObjectId
+//   user       User   @relation(fields: [userId], references: [id])
+//   businessId String @db.ObjectId
+//   donationId String @db.ObjectId
+//   quantity   Int
+//   total      Float
 
-  status    DonationStatus
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+//   status    DonationStatus
+//   createdAt DateTime       @default(now())
+//   updatedAt DateTime       @updatedAt
 
-  @@map("orders")
-}
+//   @@map("orders")
+// }
 
 model Review {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -256,6 +275,9 @@ model Review {
 
   donation   Donation? @relation(fields: [donationId], references: [id])
   donationId String?   @db.ObjectId
+
+  request   Requests? @relation(fields: [requestId], references: [id])
+  requestId String?   @db.ObjectId
 
   @@map("reviews")
 }
