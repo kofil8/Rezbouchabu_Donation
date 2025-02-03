@@ -5,6 +5,8 @@ import config from "../../../config";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import { generateToken } from "../../../utils/generateToken";
+import { emailTemplate } from "../../../helpars/emailtempForOTP";
+import sentEmailUtility from "../../../utils/sentEmailUtility";
 
 const loginUserFromDB = async (payload: {
   email: string;
@@ -19,6 +21,38 @@ const loginUserFromDB = async (payload: {
 
   if (!userData) {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+  }
+
+  // check is user is verified
+  if (!userData.isVerified) {
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    const emailSubject = "OTP Verification for Registration";
+
+    const emailText = `Your OTP is: ${otp}`;
+
+    const textForRegistration = `Thank you for registering with Rezbouchabu. To complete your registration, please verify your email address by entering the verification code below.`;
+
+    const emailHTML = emailTemplate(otp, textForRegistration);
+
+    await sentEmailUtility(payload.email, emailSubject, emailText, emailHTML);
+
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 5);
+
+    await prisma.otp.create({
+      data: {
+        email: payload.email,
+        otp,
+        expiry: otpExpiry,
+      },
+    });
+
+    throw new ApiError(
+      httpStatus.TEMPORARY_REDIRECT,
+      "User is not verified, Please verify your email first"
+    );
   }
 
   const isCorrectPassword = await bcrypt.compare(
@@ -51,6 +85,8 @@ const loginUserFromDB = async (payload: {
       },
     });
   }
+
+  //  check if user is verified
 
   const accessToken = generateToken(
     {

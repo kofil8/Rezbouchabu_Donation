@@ -10,6 +10,7 @@ import { generateToken } from "../../../utils/generateToken";
 import { generateTokenReset } from "../../../utils/generateTokenForReset";
 import sentEmailUtility from "../../../utils/sentEmailUtility";
 import Stripe from "stripe";
+import logger from "../../../utils/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2025-01-27.acacia",
@@ -83,6 +84,47 @@ const registerUserIntoDB = async (payload: any) => {
     fullName: user.fullName,
     role: user.role,
     isVerified: user.isVerified,
+  };
+};
+
+const resendOtp = async (payload: { email: string }) => {
+  // Check if the user exists
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (!userData) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
+  }
+
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  const emailSubject = "OTP Verification for Registration";
+
+  const emailText = `Your OTP is: ${otp}`;
+
+  const textForRegistration = `Thank you for registering with Rezbouchabu. To complete your registration, please verify your email address by entering the verification code below.`;
+
+  const emailHTML = emailTemplate(otp, textForRegistration);
+
+  await sentEmailUtility(payload.email, emailSubject, emailText, emailHTML);
+
+  const otpExpiry = new Date();
+  otpExpiry.setMinutes(otpExpiry.getMinutes() + 5);
+
+  await prisma.otp.create({
+    data: {
+      email: payload.email,
+      otp,
+      expiry: otpExpiry,
+    },
+  });
+
+  return {
+    id: userData.id,
   };
 };
 
@@ -424,6 +466,7 @@ const changePassword = async (userId: string, payload: any) => {
 
 export const UserServices = {
   registerUserIntoDB,
+  resendOtp,
   getAllUsersFromDB,
   getUserDetailsFromDB,
   deleteUser,

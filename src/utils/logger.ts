@@ -1,11 +1,12 @@
 import { createLogger, format, transports } from "winston";
-const { combine, timestamp, json, colorize } = format;
+const { combine, timestamp, json, colorize, label, printf } = format;
 
-// Custom format for console logging with colors
+// Custom format for console logging with colors and emoji
 const consoleLogFormat = format.combine(
   format.colorize(),
-  format.printf(({ level, message, timestamp }) => {
-    return `${level}: ${message}`;
+  format.label({ label: " 🚀" }),
+  printf(({ level, label, message, timestamp }) => {
+    return `${label} ${level}: ${message}`;
   })
 );
 

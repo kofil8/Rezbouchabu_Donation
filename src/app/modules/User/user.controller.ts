@@ -10,8 +10,18 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    message:
-      "User registered successfully. Please verify your email to activate your account",
+    message: "Thanks for registering with us, please verify your email",
+    data: result,
+  });
+});
+
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.body;
+  const result = await UserServices.resendOtp(payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "OTP Resend successfully",
     data: result,
   });
 });
@@ -107,6 +117,7 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 
 export const UserControllers = {
   registerUser,
+  resendOtp,
   getAllUsers,
   getUserDetails,
   deleteUser,

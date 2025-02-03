@@ -14,6 +14,12 @@ router.post(
   UserControllers.verifyOtp
 );
 
+router.post(
+  "/resendOtp",
+  validateRequest(UserValidations.resendOtp),
+  UserControllers.resendOtp
+);
+
 router.get("/", UserControllers.getAllUsers);
 
 router.get("/:id", auth(), UserControllers.getUserDetails);

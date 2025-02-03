@@ -77,7 +77,7 @@ export const createPayment = async (
 
   // Check and cancel the user's existing local subscription
   const existingSubscription = await prisma.subscriptionPlan.findFirst({
-    where: { userId: userId, status: "ACTIVE" },
+    where: { id: subscriptionPlanId, status: "ACTIVE" },
   });
 
   if (existingSubscription) {

@@ -1,4 +1,5 @@
-export const imageurl = "https://ibb.co.com/J23YWnF";
+export const imageurl =
+  "https://i.ibb.co.com/d4pRZgLT/Why-should-you-donate-to-the-education-of-impoverished-children.jpg";
 export const emailTemplate = (otp: number, text: string) => `
 <html>
 <head>
@@ -103,6 +104,13 @@ export const emailTemplate = (otp: number, text: string) => `
                                         <h1 style="margin:0;">
                                             ${otp}
                                         </h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding:5px 20px;">
+                                        <p style="margin:0; color:red;">
+                                            This OTP is valid for 5 minutes
+                                        </p>
                                     </td>
                                 </tr>
                             </table>

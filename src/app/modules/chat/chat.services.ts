@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 
 // Create a new conversation between two users
 const createConversationIntoDB = async (user1Id: string, user2Id: string) => {
-  // Check if a conversation already exists between these two users
   const existingConversation = await prisma.conversation.findFirst({
     where: {
       OR: [
@@ -38,11 +37,11 @@ const getConversationsByUserIdIntoDB = async (userId: string) => {
       OR: [{ user1Id: userId }, { user2Id: userId }],
     },
     include: {
-      user1: true, // Include details of user1
-      user2: true, // Include details of user2
+      user1: true,
+      user2: true,
       messages: {
-        orderBy: { createdAt: "desc" }, // Include the latest message
-        take: 1, // Just get the latest message for preview
+        orderBy: { createdAt: "desc" },
+        take: 1,
       },
     },
   });
@@ -107,8 +106,8 @@ const getChatUsersForUser = async (userId: string) => {
       user1: true,
       user2: true,
       messages: {
-        orderBy: { createdAt: "desc" }, // Get the most recent message
-        take: 1, // Only return the latest message
+        orderBy: { createdAt: "desc" },
+        take: 1,
       },
     },
   });
@@ -166,7 +165,7 @@ const countUnreadMessages = async (userId: string, chatroomId: string) => {
     where: {
       conversationId: chatroomId,
       receiverId: userId,
-      isRead: false, // Only count unread messages
+      isRead: false,
     },
   });
 
@@ -211,9 +210,7 @@ const getMyChat = async (userId: string) => {
         where: { id: targetUserId },
         select: {
           id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
+          fullName: true,
           profileImage: true,
         },
       });
