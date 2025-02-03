@@ -9,12 +9,8 @@ import prisma from "../../../shared/prisma";
 import { generateToken } from "../../../utils/generateToken";
 import { generateTokenReset } from "../../../utils/generateTokenForReset";
 import sentEmailUtility from "../../../utils/sentEmailUtility";
-import Stripe from "stripe";
 import logger from "../../../utils/logger";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-01-27.acacia",
-});
+import stripe from "../../../helpars/stripe";
 
 const registerUserIntoDB = async (payload: any) => {
   const hashedPassword: string = await bcrypt.hash(payload.password, 12);
@@ -32,16 +28,16 @@ const registerUserIntoDB = async (payload: any) => {
     );
   }
 
-  const customer = await stripe.customers.create({
-    email: payload.email,
-  });
+  // // const customer = await stripe.customers.create({
+  // //   email: payload.email,
+  // // });
 
-  if (!customer) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Failed to create Stripe customer"
-    );
-  }
+  // if (!customer) {
+  //   throw new ApiError(
+  //     httpStatus.BAD_REQUEST,
+  //     "Failed to create Stripe customer"
+  //   );
+  // }
 
   const fullName = `${payload.firstName} ${payload.lastName}`;
 
@@ -50,7 +46,6 @@ const registerUserIntoDB = async (payload: any) => {
       ...payload,
       fullName,
       password: hashedPassword,
-      stripeCustomerId: customer.id,
     },
   });
 

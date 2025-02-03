@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
 
-import { PaymentServices } from "./payment.service";
+import { PaymentServices } from "./subscription.service";
 import catchAsync from "../../../shared/catchAsync";
 import ApiError from "../../../errors/ApiErrors";
 import sendResponse from "../../../shared/sendResponse";
