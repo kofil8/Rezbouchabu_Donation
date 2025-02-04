@@ -15,9 +15,9 @@ router.post(
 );
 
 router.post(
-  "/resendOtp",
+  "/resend-otp-reg",
   validateRequest(UserValidations.resendOtp),
-  UserControllers.resendOtp
+  UserControllers.resendOtpReg
 );
 
 router.get("/", UserControllers.getAllUsers);
@@ -30,6 +30,12 @@ router.post(
   "/forgot-password",
   validateRequest(UserValidations.forgotPassword),
   UserControllers.forgotPassword
+);
+
+router.post(
+  "/resend-otp-rest",
+  validateRequest(UserValidations.resendOtp),
+  UserControllers.resendOtpRest
 );
 
 router.post(

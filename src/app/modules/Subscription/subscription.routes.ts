@@ -1,11 +1,12 @@
 import express from "express";
-import { PaymentControllers } from "./subscription.controller";
 import auth from "../../middlewares/auth";
-import { SubscriptionWebhook } from "./subscription.webhook";
+import { SubscriptionControllers } from "./subscription.controller";
 const router = express.Router();
 
-// // stirpe
-// router.post("/customers", createCustomer);
-// router.post("/subscriptions", createSubscription);
-
-export const PaymentRouters = router;
+//stirpe
+router.post(
+  "/create-customer",
+  auth(),
+  SubscriptionControllers.creteStripeUser
+);
+export const SubscriptionRouters = router;

@@ -1,10 +1,18 @@
-import prisma from "../../../shared/prisma";
-import ApiError from "../../../errors/ApiErrors";
-import config from "../../../config";
+import { Category, Prisma } from "@prisma/client";
 import httpStatus from "http-status";
-import e from "express";
+import config from "../../../config";
+import ApiError from "../../../errors/ApiErrors";
+import { IPaginationOptions } from "../../../interfaces/paginations";
+import prisma from "../../../shared/prisma";
+import { calculatePagination } from "../../../utils/calculatePagination";
 import logger from "../../../utils/logger";
-import { category } from "@prisma/client";
+
+export type Filters = {
+  searchTerm: string;
+  category: Category;
+  subCategory: string;
+  condition: string;
+};
 
 const createDonationIntoDB = async (id: string, payload: any, files: any) => {
   const existingUser = await prisma.user.findUnique({
@@ -24,7 +32,7 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
       )
     : [];
 
-  if (payload.category === category.Food) {
+  if (payload.category === Category.Food) {
     payload.subcategory = null;
   }
 
@@ -68,24 +76,70 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
   return donation;
 };
 
-const getAllDonationsFromDB = async () => {
+const getAllDonationsFromDB = async (
+  options: IPaginationOptions,
+  params: Filters
+) => {
+  const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
+  const { searchTerm, ...restParams } = params || {};
+
+  const andConditions: Prisma.DonationWhereInput[] = [];
+
+  // search by user
+  if (searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          name: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (Object.keys(restParams).length) {
+    andConditions.push({
+      AND: Object.keys(restParams).map((key) => ({
+        [key]: {
+          //category:{equals:Food}
+          equals: restParams[key as keyof typeof restParams],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.DonationWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
   const result = await prisma.donation.findMany({
-    select: {
-      id: true,
-      userId: true,
-      name: true,
-      description: true,
-      donationImages: true,
-      latitude: true,
-      longitude: true,
-      category: true,
-      subcategory: true,
-      condition: true,
-      createdAt: true,
-      updatedAt: true,
+    where: whereConditions,
+    take: limit,
+    skip,
+    orderBy: {
+      [sortBy]: sortOrder,
     },
   });
-  return result;
+
+  const total = await prisma.donation.count({
+    where: whereConditions,
+  });
+
+  const meta = {
+    page,
+    limit,
+    total_docs: total,
+    total_pages: Math.ceil(total / limit),
+  };
+
+  return { meta, data: result };
 };
 
 const getSingleDonationFromDB = async (id: string) => {
@@ -123,7 +177,7 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
       )
     : [];
 
-  if (payload.category === category.Food) {
+  if (payload.category === Category.Food) {
     payload.subcategory = null;
   }
   logger.info(

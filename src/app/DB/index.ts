@@ -8,6 +8,7 @@ const superAdminData = {
   lastName: "Admin",
   email: "admin@gmail.com",
   password: "",
+  isVerified: true,
   role: Role.SUPER_ADMIN,
 };
 
@@ -27,6 +28,8 @@ const seedSuperAdmin = async () => {
         config.super_admin_password as string,
         Number(config.salt) || 12
       );
+
+      const fullName = `${superAdminData.firstName} ${superAdminData.lastName}`;
 
       superAdmin = await prisma.user.create({
         data: superAdminData,

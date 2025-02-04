@@ -8,6 +8,7 @@ import { DonationRouters } from "../modules/Donation/donation.routes";
 import { ProfileRouters } from "../modules/Profile/profile.router";
 import { RequestRouters } from "../modules/Request/request.router";
 import { FavouriteRouters } from "../modules/favorite/favourite.routes";
+import { SubscriptionRouters } from "../modules/Subscription/subscription.routes";
 
 const router = express.Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: "/requests",
     route: RequestRouters,
+  },
+  {
+    path: "/subscription",
+    route: SubscriptionRouters,
   },
 ];
 

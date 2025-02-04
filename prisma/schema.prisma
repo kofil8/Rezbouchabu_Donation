@@ -58,7 +58,7 @@ enum SubscriptionPlanType {
 
 // CATEGORIES
 
-enum category {
+enum Category {
   Food
   Object
 }
@@ -190,7 +190,7 @@ model Donation {
   name           String
   description    String
   donationImages Json[]
-  category       category
+  category       Category
   subcategory    String?
   condition      String?
   latitude       Float?
@@ -213,7 +213,7 @@ model Requests {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  category    category
+  category    Category
   subcategory String?
   latitude    Float?
   longitude   Float?

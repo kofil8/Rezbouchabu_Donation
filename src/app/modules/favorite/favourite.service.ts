@@ -4,6 +4,17 @@ import prisma from "../../../shared/prisma";
 
 // donation to favourite
 const addToFavouriteDonation = async (userId: string, donationId: string) => {
+  const existingFavourite = await prisma.favourite.findFirst({
+    where: {
+      userId: userId,
+      donationId: donationId,
+    },
+  });
+
+  if (existingFavourite) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Favourite already exists");
+  }
+
   const result = await prisma.favourite.create({
     data: {
       userId: userId,
@@ -58,6 +69,16 @@ const removeFromFavouriteDonation = async (
 
 // request to favourite
 const addToFavouriteRequest = async (userId: string, requsetId: string) => {
+  const existingFavourite = await prisma.favourite.findFirst({
+    where: {
+      userId: userId,
+      requestId: requsetId,
+    },
+  });
+
+  if (existingFavourite) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Favourite already exists");
+  }
   const result = await prisma.favourite.create({
     data: {
       userId: userId,

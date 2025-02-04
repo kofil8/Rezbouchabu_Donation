@@ -1,9 +1,17 @@
 import prisma from "../../../shared/prisma";
 import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
-import logger from "../../../utils/logger";
-import { category } from "@prisma/client";
+import { Category, Prisma } from "@prisma/client";
+import { IPaginationOptions } from "../../../interfaces/paginations";
+import { calculatePagination } from "../../../utils/calculatePagination";
+import { toASCII } from "punycode";
 
+export type Filters = {
+  searchTerm: string;
+  category: Category;
+  subCategory: string;
+  condition: string;
+};
 const createRequestIntoDB = async (id: string, payload: any) => {
   const existingUser = await prisma.user.findUnique({
     where: { id: id },
@@ -14,13 +22,9 @@ const createRequestIntoDB = async (id: string, payload: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  if (payload.category === category.Food) {
+  if (payload.category === Category.Food) {
     payload.subcategory = null;
   }
-
-  logger.info(
-    "Category: " + payload.category + " Subcategory: " + payload.subcategory
-  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -55,22 +59,67 @@ const createRequestIntoDB = async (id: string, payload: any) => {
   return request;
 };
 
-const getAllRequestsFromDB = async () => {
+const getAllRequestsFromDB = async (
+  options: IPaginationOptions,
+  params: Filters
+) => {
+  const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
+
+  const andConditions: Prisma.RequestsWhereInput[] = [];
+
+  // search by user
+  if (params.searchTerm) {
+    andConditions.push({
+      OR: [
+        {
+          name: {
+            contains: params.searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: params.searchTerm,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (Object.keys(params).length) {
+    andConditions.push({
+      AND: Object.keys(params).map((key) => ({
+        [key]: {
+          equals: (params as any)[key],
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.RequestsWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
   const result = await prisma.requests.findMany({
-    select: {
-      id: true,
-      userId: true,
-      name: true,
-      description: true,
-      latitude: true,
-      longitude: true,
-      category: true,
-      subcategory: true,
-      createdAt: true,
-      updatedAt: true,
+    where: whereConditions,
+    take: limit,
+    skip,
+    orderBy: {
+      [sortBy]: sortOrder,
     },
   });
-  return result;
+
+  const total = await prisma.requests.count({
+    where: whereConditions,
+  });
+
+  const meta = {
+    page,
+    limit,
+    total_docs: total,
+    total_pages: Math.ceil(total / limit),
+  };
+  return { meta, data: result };
 };
 
 const getSingleRequestFromDB = async (id: string) => {

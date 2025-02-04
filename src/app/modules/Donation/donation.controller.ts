@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status";
+import pick from "../../../shared/pick";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
-import { DonationServices } from "./donation.service";
+import { DonationServices, Filters } from "./donation.service";
 
 const createDonation = catchAsync(async (req: Request, res: Response) => {
   const id = req.user.id;
@@ -22,7 +23,22 @@ const createDonation = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllDonations = catchAsync(async (req: Request, res: Response) => {
-  const result = await DonationServices.getAllDonationsFromDB();
+  const paginationOptions = pick(req.query, [
+    "page",
+    "limit",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const filters = pick(req.query, [
+    "searchTerm",
+    "category",
+    "subCategory",
+    "condition",
+  ]);
+  const result = await DonationServices.getAllDonationsFromDB(
+    paginationOptions,
+    filters as Filters
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -3,6 +3,8 @@ import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { RequestServices } from "./request.service";
+import pick from "../../../shared/pick";
+import { Filters } from "../Donation/donation.service";
 
 const createRequest = catchAsync(async (req: Request, res: Response) => {
   const id = req.user.id;
@@ -17,7 +19,24 @@ const createRequest = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllRequests = catchAsync(async (req: Request, res: Response) => {
-  const result = await RequestServices.getAllRequestsFromDB();
+  const paginationOptions = pick(req.query, [
+    "page",
+    "limit",
+    "sortBy",
+    "sortOrder",
+  ]);
+
+  const filters = pick(req.query, [
+    "searchTerm",
+    "category",
+    "subCategory",
+    "condition",
+  ]);
+
+  const result = await RequestServices.getAllRequestsFromDB(
+    paginationOptions,
+    filters as Filters
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -15,13 +15,13 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const resendOtp = catchAsync(async (req: Request, res: Response) => {
+const resendOtpReg = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
-  const result = await UserServices.resendOtp(payload);
+  const result = await UserServices.resendOtpReg(payload);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "OTP Resend successfully",
+    message: "OTP Resend successfully, please check your email",
     data: result,
   });
 });
@@ -63,6 +63,17 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     message: "OTP sent successfully",
+    data: result,
+  });
+});
+
+const resendOtpRest = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.body;
+  const result = await UserServices.resendOtpRest(payload);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "OTP Resend successfully, please check your email",
     data: result,
   });
 });
@@ -117,11 +128,12 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 
 export const UserControllers = {
   registerUser,
-  resendOtp,
+  resendOtpReg,
   getAllUsers,
   getUserDetails,
   deleteUser,
   forgotPassword,
+  resendOtpRest,
   ResetOtpVerify,
   resetPassword,
   verifyOtp,
