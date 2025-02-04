@@ -575,3 +575,4 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/api/v1/profile/me\",\"status\":\"200\",\"responseTime\":\"107.505\"}","timestamp":"2025-02-04T09:26:44.607Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/api/v1/profile/me\",\"status\":\"200\",\"responseTime\":\"108.376\"}","timestamp":"2025-02-04T09:26:58.109Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/api/v1/profile/me\",\"status\":\"200\",\"responseTime\":\"102.354\"}","timestamp":"2025-02-04T09:27:29.007Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"GET\",\"url\":\"/api/v1/profile/me\",\"status\":\"200\",\"responseTime\":\"102.580\"}","timestamp":"2025-02-04T09:27:50.271Z"}
