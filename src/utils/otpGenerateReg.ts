@@ -5,14 +5,6 @@ import prisma from "../shared/prisma";
 import sentEmailUtility from "./sentEmailUtility";
 
 export const generateOtpReg = async (payload: { email: string }) => {
-  const userData = await prisma.user.findUnique({
-    where: { email: payload.email, isVerified: true },
-  });
-
-  if (!userData) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
-  }
-
   // Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000);
 

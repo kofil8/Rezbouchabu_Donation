@@ -71,4 +71,45 @@ const creteStripeUser = async (userId: string, paymentMethodId: string) => {
   return customer;
 };
 
-export const SubscriptionServices = { creteStripeUser };
+const createSubscription = async (userId: string, planId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      stripeCustomerId: true,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (!user.stripeCustomerId) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "User does not have a Stripe customer ID"
+    );
+  }
+
+  const subscription = await stripe.subscriptions.create({
+    customer: user.stripeCustomerId,
+    items: [{ price: planId }],
+    payment_behavior: "allow_incomplete",
+    expand: ["latest_invoice.payment_intent"],
+  });
+
+  await prisma.subscription.create({
+    data: {
+      userId: user.id,
+      stripeCustomerId: user.stripeCustomerId,
+      stripeSubscriptionId: subscription.id,
+      planId: planId,
+      status: SubscriptionStatus.ACTIVE,
+    },
+  });
+
+  return subscription;
+};
+
+export const SubscriptionServices = { creteStripeUser, createSubscription };

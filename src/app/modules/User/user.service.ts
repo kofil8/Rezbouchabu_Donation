@@ -36,11 +36,13 @@ const registerUserIntoDB = async (payload: any) => {
       ...payload,
       fullName,
       password: hashedPassword,
+      isVerified: false,
     },
   });
 
   const { otp, otpExpiry } = await generateOtpReg({ email: payload.email });
 
+  // Save otp in database
   await prisma.otp.create({
     data: {
       email: payload.email,

@@ -140,22 +140,23 @@ model level {
 }
 
 model Subscription {
-  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId               String   @db.ObjectId
-  user                 User     @relation(fields: [userId], references: [id])
+  id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String             @db.ObjectId
+  user                 User               @relation(fields: [userId], references: [id])
   stripeCustomerId     String
   stripeSubscriptionId String
-  status               String
-  startDate            DateTime
-  endDate              DateTime
-  trialEndDate         DateTime
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  planId               String
+  status               SubscriptionStatus @default(ACTIVE)
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  trialEndDate         DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   @@map("subscriptions")
 }
 
-model antiWasteDonation {
+model antiWastePost {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   Title       String
   Description String?

@@ -9,4 +9,10 @@ router.post(
   auth(),
   SubscriptionControllers.creteStripeUser
 );
+
+router.post(
+  "/create-subscription",
+  auth(),
+  SubscriptionControllers.createSubscription
+);
 export const SubscriptionRouters = router;

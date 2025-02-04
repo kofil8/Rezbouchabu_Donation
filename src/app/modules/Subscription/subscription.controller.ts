@@ -25,6 +25,22 @@ const creteStripeUser = catchAsync(
   }
 );
 
+const createSubscription = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const planId = req.body.planId;
+  if (!userId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "User not authenticated");
+  }
+  const result = await SubscriptionServices.createSubscription(userId, planId);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Subscription created successfully",
+    data: result,
+  });
+});
+
 export const SubscriptionControllers = {
   creteStripeUser,
+  createSubscription,
 };
