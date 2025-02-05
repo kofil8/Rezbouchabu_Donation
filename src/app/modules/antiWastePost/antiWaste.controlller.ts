@@ -3,13 +3,13 @@ import httpStatus from "http-status";
 import pick from "../../../shared/pick";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
-import { DonationServices, Filters } from "./donation.service";
+import { AnitWasteServices, Filters } from "./antiWaste.services";
 
-const createDonation = catchAsync(async (req: Request, res: Response) => {
+const createAntiWastePost = catchAsync(async (req: Request, res: Response) => {
   const id = req.user.id;
   const payload = req.body.bodyData;
   const files = req.files as any;
-  const result = await DonationServices.createDonationIntoDB(
+  const result = await AnitWasteServices.createAnitWasteIntoDB(
     id,
     payload,
     files
@@ -17,12 +17,12 @@ const createDonation = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
-    message: "Donation created successfully",
+    message: "AnitWaste created successfully",
     data: result,
   });
 });
 
-const getAllDonations = catchAsync(async (req: Request, res: Response) => {
+const getAllAnitWastes = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = pick(req.query, [
     "page",
     "limit",
@@ -35,34 +35,34 @@ const getAllDonations = catchAsync(async (req: Request, res: Response) => {
     "subCategory",
     "condition",
   ]);
-  const result = await DonationServices.getAllDonationsFromDB(
+  const result = await AnitWasteServices.getAllAnitWastesFromDB(
     paginationOptions,
     filters as Filters
   );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Donations Retrieve successfully",
+    message: "AnitWastes Retrieve successfully",
     data: result,
   });
 });
 
-const getSingleDonation = catchAsync(async (req: Request, res: Response) => {
+const getSingleAnitWaste = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result = await DonationServices.getSingleDonationFromDB(id);
+  const result = await AnitWasteServices.getSingleAnitWasteFromDB(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Donation Retrieve successfully",
+    message: "AnitWaste Retrieve successfully",
     data: result,
   });
 });
 
-const updateDonation = catchAsync(async (req: Request, res: Response) => {
+const updateAnitWaste = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const payload = req.body.bodyData;
   const files = req.files as any;
-  const result = await DonationServices.updateDonationIntoDB(
+  const result = await AnitWasteServices.updateAnitWasteIntoDB(
     id,
     payload,
     files
@@ -70,25 +70,25 @@ const updateDonation = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Donation updated successfully",
+    message: "AnitWaste updated successfully",
     data: result,
   });
 });
 
-const deleteDonation = catchAsync(async (req: Request, res: Response) => {
+const deleteAnitWaste = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const result = await DonationServices.deleteDonationIntoDB(id);
+  const result = await AnitWasteServices.deleteAnitWasteIntoDB(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Donation deleted successfully",
+    message: "AnitWaste deleted successfully",
     data: result,
   });
 });
-export const DonationControllers = {
-  createDonation,
-  getAllDonations,
-  getSingleDonation,
-  updateDonation,
-  deleteDonation,
+export const AnitWasteControllers = {
+  createAntiWastePost,
+  getAllAnitWastes,
+  getSingleAnitWaste,
+  updateAnitWaste,
+  deleteAnitWaste,
 };

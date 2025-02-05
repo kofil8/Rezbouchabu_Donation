@@ -10,7 +10,8 @@ import { RequestRouters } from "../modules/Request/request.router";
 import { FavouriteRouters } from "../modules/favorite/favourite.routes";
 import { SubscriptionRouters } from "../modules/Subscription/subscription.routes";
 import { CategoryRouters } from "../modules/categoryPost/category.routes";
-import { ConditionRouters } from "../modules/ConditionPost/condition.router";
+import { ConditionRouters } from "../modules/conditionPost/condition.router";
+import { AntiWastePostRouters } from "../modules/antiWastePost/antiWaste.router";
 
 const router = express.Router();
 
@@ -58,6 +59,10 @@ const moduleRoutes = [
   {
     path: "/requests",
     route: RequestRouters,
+  },
+  {
+    path: "/antiWaste",
+    route: AntiWastePostRouters,
   },
   {
     path: "/subscription",

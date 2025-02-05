@@ -9,12 +9,9 @@ import logger from "../../../utils/logger";
 
 export type Filters = {
   searchTerm: string;
-  category: Category;
-  subCategory: string;
-  condition: string;
 };
 
-const createPostIntoDB = async (id: string, payload: any, files: any) => {
+const createAnitWasteIntoDB = async (id: string, payload: any, files: any) => {
   const existingUser = await prisma.user.findUnique({
     where: { id: id },
     select: { id: true },
@@ -24,21 +21,13 @@ const createPostIntoDB = async (id: string, payload: any, files: any) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
 
-  const imageURL = files?.donationImages
-    ? files.donationImages.map((file: any) =>
+  const imageURL = files?.antiWasteImages
+    ? files.antiWasteImages.map((file: any) =>
         file.originalname
-          ? `${config.backend_image_url}/uploads/${file.originalname}`
+          ? `${config.backend_image_url}/uploads/antiWaste/${file.originalname}`
           : ""
       )
     : [];
-
-  if (payload.category === Category.Food) {
-    payload.subcategory = null;
-  }
-
-  logger.info(
-    "Category: " + payload.category + " Subcategory: " + payload.subcategory
-  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -51,46 +40,32 @@ const createPostIntoDB = async (id: string, payload: any, files: any) => {
 
   const userId = existingUser.id;
 
-  const donation = await prisma.donation.create({
+  const antiWaste = await prisma.antiWastePost.create({
     data: {
       userId,
       ...parsedPayload,
-      donationImages: imageURL,
-    },
-    select: {
-      id: true,
-      userId: true,
-      name: true,
-      description: true,
-      donationImages: true,
-      category: true,
-      subcategory: true,
-      latitude: true,
-      longitude: true,
-      condition: true,
-      createdAt: true,
-      updatedAt: true,
+      antiWasteImages: imageURL,
     },
   });
 
-  return donation;
+  return antiWaste;
 };
 
-const getAllDonationsFromDB = async (
+const getAllAnitWastesFromDB = async (
   options: IPaginationOptions,
   params: Filters
 ) => {
   const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options);
-  const { searchTerm, ...restParams } = params || {};
+  const { searchTerm } = params || {};
 
-  const andConditions: Prisma.DonationWhereInput[] = [];
+  const andConditions: Prisma.antiWastePostWhereInput[] = [];
 
   // search by user
   if (searchTerm) {
     andConditions.push({
       OR: [
         {
-          name: {
+          title: {
             contains: searchTerm,
             mode: "insensitive",
           },
@@ -105,21 +80,10 @@ const getAllDonationsFromDB = async (
     });
   }
 
-  if (Object.keys(restParams).length) {
-    andConditions.push({
-      AND: Object.keys(restParams).map((key) => ({
-        [key]: {
-          //category:{equals:Food}
-          equals: restParams[key as keyof typeof restParams],
-        },
-      })),
-    });
-  }
-
-  const whereConditions: Prisma.DonationWhereInput =
+  const whereConditions: Prisma.antiWastePostWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  const result = await prisma.donation.findMany({
+  const result = await prisma.antiWastePost.findMany({
     where: whereConditions,
     take: limit,
     skip,
@@ -128,7 +92,7 @@ const getAllDonationsFromDB = async (
     },
   });
 
-  const total = await prisma.donation.count({
+  const total = await prisma.antiWastePost.count({
     where: whereConditions,
   });
 
@@ -142,21 +106,20 @@ const getAllDonationsFromDB = async (
   return { meta, data: result };
 };
 
-const getSingleDonationFromDB = async (id: string) => {
-  const result = await prisma.donation.findUnique({
+const getSingleAnitWasteFromDB = async (id: string) => {
+  const result = await prisma.antiWastePost.findUnique({
     where: {
       id,
     },
   });
   if (!result) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "AntiWaste is not found");
   }
   return result;
 };
 
-const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
-  console.log(id);
-  const existingDonation = await prisma.donation.findUnique({
+const updateAnitWasteIntoDB = async (id: string, payload: any, files: any) => {
+  const existingAntiWaste = await prisma.antiWastePost.findUnique({
     where: {
       id,
     },
@@ -165,24 +128,17 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
     },
   });
 
-  if (!existingDonation) {
+  if (!existingAntiWaste) {
     throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
   }
 
-  const imageURL = files?.donationImages
-    ? files.donationImages.map((file: any) =>
+  const imageURL = files?.antiWasteImages
+    ? files.antiWasteImages.map((file: any) =>
         file.originalname
-          ? `${config.backend_image_url}/uploads/${file.originalname}`
+          ? `${config.backend_image_url}/uploads/antiWaste/${file.originalname}`
           : ""
       )
     : [];
-
-  if (payload.category === Category.Food) {
-    payload.subcategory = null;
-  }
-  logger.info(
-    "Category: " + payload.category + " Subcategory: " + payload.subcategory
-  );
 
   let parsedPayload = payload;
   if (typeof payload === "string") {
@@ -192,7 +148,7 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
     }
   }
-  const donation = await prisma.donation.update({
+  const antiWaste = await prisma.antiWastePost.update({
     where: {
       id,
     },
@@ -200,47 +156,33 @@ const updateDonationIntoDB = async (id: string, payload: any, files: any) => {
       ...parsedPayload,
       donationImages: imageURL,
     },
-    select: {
-      id: true,
-      userId: true,
-      name: true,
-      description: true,
-      donationImages: true,
-      latitude: true,
-      longitude: true,
-      category: true,
-      subcategory: true,
-      condition: true,
-      createdAt: true,
-      updatedAt: true,
-    },
   });
-  return donation;
+  return antiWaste;
 };
 
-const deleteDonationIntoDB = async (id: string) => {
-  const existingDonation = await prisma.donation.findUnique({
+const deleteAnitWasteIntoDB = async (id: string) => {
+  const existingAntiWaste = await prisma.antiWastePost.findUnique({
     where: {
       id,
     },
   });
 
-  if (!existingDonation) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Donation not found");
+  if (!existingAntiWaste) {
+    throw new ApiError(httpStatus.NOT_FOUND, "AntiWaste is not found");
   }
 
-  const donation = await prisma.donation.delete({
+  const AntiWaste = await prisma.antiWastePost.delete({
     where: {
       id,
     },
   });
-  return donation;
+  return AntiWaste;
 };
 
-export const DonationServices = {
-  createDonationIntoDB,
-  getAllDonationsFromDB,
-  getSingleDonationFromDB,
-  updateDonationIntoDB,
-  deleteDonationIntoDB,
+export const AnitWasteServices = {
+  createAnitWasteIntoDB,
+  getAllAnitWastesFromDB,
+  getSingleAnitWasteFromDB,
+  updateAnitWasteIntoDB,
+  deleteAnitWasteIntoDB,
 };

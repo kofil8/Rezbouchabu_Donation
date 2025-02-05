@@ -1,35 +1,28 @@
 import express from "express";
-import parseBodyData from "../../../../helpars/parseBodyData";
-import auth from "../../../middlewares/auth";
-import { DonationControllers } from "./donation.controller";
-import { fileUploader } from "../../../../helpars/fileUploader";
+import { parseBodyData } from "../../middlewares/parseBodyData";
+import auth from "../../middlewares/auth";
+import { AnitWasteControllers } from "./antiWaste.controlller";
 
 const router = express.Router();
 
 router.post(
   "/",
-  auth("ADMIN", "SELLER"),
-  fileUploader.uploadDonationImages,
+  auth(),
   parseBodyData,
-  DonationControllers.createDonation
+  AnitWasteControllers.createAntiWastePost
 );
 
-router.get("/", auth(), DonationControllers.getAllDonations);
+router.get("/", auth(), AnitWasteControllers.getAllAnitWastes);
 
-router.get("/:id", auth(), DonationControllers.getSingleDonation);
+router.get("/:id", auth(), AnitWasteControllers.getSingleAnitWaste);
 
 router.patch(
   "/:id",
-  auth("ADMIN", "DONOR"),
-  fileUploader.uploadDonationImages,
+  auth(),
   parseBodyData,
-  DonationControllers.updateDonation
+  AnitWasteControllers.updateAnitWaste
 );
 
-router.delete(
-  "/:id",
-  auth("ADMIN", "DONOR"),
-  DonationControllers.deleteDonation
-);
+router.delete("/:id", auth(), AnitWasteControllers.deleteAnitWaste);
 
 export const AntiWastePostRouters = router;

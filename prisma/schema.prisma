@@ -97,6 +97,7 @@ model User {
 
   donations     Donation[]      @relation
   requests      Requests[]      @relation
+  antiWastePost antiWastePost[] @relation
   favorites     Favourite[]     @relation
   reviews       Review[]        @relation
   notifications Notifications[] @relation("Notifications")
@@ -157,19 +158,22 @@ model Subscription {
 }
 
 model antiWastePost {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  Title       String
-  Description String?
-  Price       Float
-  discount    Float
-  Image       String
-  type        String
-  latitude    Float?
-  longitude   Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String?
+  price           Float
+  contactNumber   String
+  address         String
+  antiWasteImages Json[]
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  @@map("antiWasteDonations")
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+
+  @@map("antiWastePosts")
 }
 
 model Notifications {

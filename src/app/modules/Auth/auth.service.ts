@@ -5,8 +5,6 @@ import config from "../../../config";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import { generateToken } from "../../../utils/generateToken";
-import { emailTemplate } from "../../../helpars/emailtempForOTP";
-import sentEmailUtility from "../../../utils/sentEmailUtility";
 import { generateOtpReg } from "../../../utils/otpGenerateReg";
 
 const loginUserFromDB = async (payload: {
