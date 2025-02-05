@@ -27,7 +27,7 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
   const imageURL = files?.donationImages
     ? files.donationImages.map((file: any) =>
         file.originalname
-          ? `${config.backend_image_url}/uploads/${file.originalname}`
+          ? `${config.backend_image_url}/uploads/donation/${file.originalname}`
           : ""
       )
     : [];

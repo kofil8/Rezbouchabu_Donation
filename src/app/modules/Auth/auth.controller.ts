@@ -15,7 +15,7 @@ const loginUser = catchAsync(async (req, res) => {
 const socialLogin = catchAsync(async (req, res) => {
   const result = await AuthServices.socialLogin(req.body);
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: httpStatus.CREATED,
     message: "User successfully logged in with google",
     data: result,
   });

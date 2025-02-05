@@ -40,7 +40,7 @@ const updateMyProfileIntoDB = async (id: string, payload: any, file: any) => {
 
   const profileImage =
     file && file.originalname
-      ? `${config.backend_image_url}/uploads/${file.originalname}`
+      ? `${config.backend_image_url}/uploads/profile/${file.originalname}`
       : existingUser.profileImage;
 
   // Check if payload is a string and parse it if necessary

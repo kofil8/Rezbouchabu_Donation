@@ -100,22 +100,23 @@ const socialLogin = async (payload: any) => {
     },
   });
 
-  if (!userData) {
-    const user = await prisma.user.create({
-      data: {
-        email: payload.email,
-        role: payload.role,
-        isOnline: true,
-        isVerified: true,
-      },
-    });
-
+  if (userData) {
+    if (payload?.fcmToken) {
+      await prisma.user.update({
+        where: {
+          email: payload.email,
+        },
+        data: {
+          fcmToken: payload.fcmToken,
+        },
+      });
+    }
     const accessToken = generateToken(
       {
-        id: user.id,
-        email: user.email as string,
-        role: user.role,
-        isOnline: user.isOnline,
+        id: userData.id,
+        email: userData.email as string,
+        role: userData.role,
+        isOnline: userData.isOnline,
       },
       config.jwt.jwt_secret as Secret,
       config.jwt.expires_in as string
@@ -123,29 +124,49 @@ const socialLogin = async (payload: any) => {
 
     return {
       accessToken,
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      id: userData.id,
+      email: userData.email,
+      role: userData.role,
+    };
+  } else {
+    const userData = await prisma.user.create({
+      data: {
+        email: payload.email,
+        isOnline: true,
+        isVerified: true,
+        role: "USER",
+      },
+    });
+
+    if (payload?.fcmToken) {
+      await prisma.user.update({
+        where: {
+          email: payload.email,
+        },
+        data: {
+          fcmToken: payload.fcmToken,
+        },
+      });
+    }
+
+    const accessToken = generateToken(
+      {
+        id: userData.id,
+        email: userData.email as string,
+        role: userData.role,
+        isOnline: userData.isOnline,
+      },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.expires_in as string
+    );
+
+    return {
+      accessToken,
+      id: userData.id,
+      email: userData.email,
+      role: userData.role,
     };
   }
-
-  const accessToken = generateToken(
-    {
-      id: userData.id,
-      email: userData.email as string,
-      role: userData.role,
-      isOnline: userData.isOnline,
-    },
-    config.jwt.jwt_secret as Secret,
-    config.jwt.expires_in as string
-  );
-
-  return {
-    accessToken,
-    id: userData.id,
-    email: userData.email,
-    role: userData.role,
-  };
 };
 
 const logoutUser = async (id: string) => {

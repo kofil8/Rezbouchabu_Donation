@@ -9,7 +9,8 @@ import { ProfileRouters } from "../modules/Profile/profile.router";
 import { RequestRouters } from "../modules/Request/request.router";
 import { FavouriteRouters } from "../modules/favorite/favourite.routes";
 import { SubscriptionRouters } from "../modules/Subscription/subscription.routes";
-import { CategoryRouters } from "../modules/category/category.routes";
+import { CategoryRouters } from "../modules/categoryPost/category.routes";
+import { ConditionRouters } from "../modules/ConditionPost/condition.router";
 
 const router = express.Router();
 
@@ -45,6 +46,10 @@ const moduleRoutes = [
   {
     path: "/categories",
     route: CategoryRouters,
+  },
+  {
+    path: "/conditions",
+    route: ConditionRouters,
   },
   {
     path: "/donations",
