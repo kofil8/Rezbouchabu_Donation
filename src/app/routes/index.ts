@@ -9,6 +9,7 @@ import { ProfileRouters } from "../modules/Profile/profile.router";
 import { RequestRouters } from "../modules/Request/request.router";
 import { FavouriteRouters } from "../modules/favorite/favourite.routes";
 import { SubscriptionRouters } from "../modules/Subscription/subscription.routes";
+import { CategoryRouters } from "../modules/category/category.routes";
 
 const router = express.Router();
 
@@ -40,6 +41,10 @@ const moduleRoutes = [
   {
     path: "/chat",
     route: ChatRouters,
+  },
+  {
+    path: "/categories",
+    route: CategoryRouters,
   },
   {
     path: "/donations",

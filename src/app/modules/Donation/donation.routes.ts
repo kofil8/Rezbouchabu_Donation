@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  auth("ADMIN", "DONOR"),
+  auth(),
   fileUploader.uploadDonationImages,
   parseBodyData,
   DonationControllers.createDonation
@@ -20,16 +20,12 @@ router.get("/:id", auth(), DonationControllers.getSingleDonation);
 
 router.patch(
   "/:id",
-  auth("ADMIN", "DONOR"),
+  auth(),
   fileUploader.uploadDonationImages,
   parseBodyData,
   DonationControllers.updateDonation
 );
 
-router.delete(
-  "/:id",
-  auth("ADMIN", "DONOR"),
-  DonationControllers.deleteDonation
-);
+router.delete("/:id", auth(), DonationControllers.deleteDonation);
 
 export const DonationRouters = router;

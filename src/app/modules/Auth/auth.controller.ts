@@ -12,6 +12,15 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+const socialLogin = catchAsync(async (req, res) => {
+  const result = await AuthServices.socialLogin(req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "User successfully logged in with google",
+    data: result,
+  });
+});
+
 const logoutUser = catchAsync(async (req, res) => {
   const id = req.user.id;
   await AuthServices.logoutUser(id);
@@ -23,4 +32,4 @@ const logoutUser = catchAsync(async (req, res) => {
   });
 });
 
-export const AuthControllers = { loginUser, logoutUser };
+export const AuthControllers = { loginUser, socialLogin, logoutUser };

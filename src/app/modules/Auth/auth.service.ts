@@ -93,6 +93,61 @@ const loginUserFromDB = async (payload: {
   };
 };
 
+const socialLogin = async (payload: any) => {
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (!userData) {
+    const user = await prisma.user.create({
+      data: {
+        email: payload.email,
+        role: payload.role,
+        isOnline: true,
+        isVerified: true,
+      },
+    });
+
+    const accessToken = generateToken(
+      {
+        id: user.id,
+        email: user.email as string,
+        role: user.role,
+        isOnline: user.isOnline,
+      },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.expires_in as string
+    );
+
+    return {
+      accessToken,
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  const accessToken = generateToken(
+    {
+      id: userData.id,
+      email: userData.email as string,
+      role: userData.role,
+      isOnline: userData.isOnline,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.expires_in as string
+  );
+
+  return {
+    accessToken,
+    id: userData.id,
+    email: userData.email,
+    role: userData.role,
+  };
+};
+
 const logoutUser = async (id: string) => {
   const userData = await prisma.user.findUnique({
     where: {
@@ -120,4 +175,4 @@ const logoutUser = async (id: string) => {
   return;
 };
 
-export const AuthServices = { loginUserFromDB, logoutUser };
+export const AuthServices = { loginUserFromDB, socialLogin, logoutUser };

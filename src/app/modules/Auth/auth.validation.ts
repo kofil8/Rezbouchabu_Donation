@@ -15,4 +15,16 @@ const loginUser = z.object({
   }),
 });
 
-export const authValidation = { loginUser };
+const socialLogin = z.object({
+  body: z.object({
+    email: z
+      .string({
+        required_error: "Email is required!",
+      })
+      .email({
+        message: "Invalid email format!",
+      }),
+  }),
+});
+
+export const authValidation = { loginUser, socialLogin };

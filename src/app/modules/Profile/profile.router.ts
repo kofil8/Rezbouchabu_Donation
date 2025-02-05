@@ -6,14 +6,10 @@ import { ProfileControllers } from "./profile.controller";
 
 const router = express.Router();
 
-router.get(
-  "/me",
-  auth("DONOR", "ADMIN", "SELLER", "ADOPTER"),
-  ProfileControllers.getMyProfile
-);
+router.get("/me", auth(), ProfileControllers.getMyProfile);
 router.patch(
   "/update",
-  auth("DONOR", "ADMIN", "SELLER", "ADOPTER"),
+  auth(),
   parseBodyData,
   fileUploader.uploadprofileImage,
   ProfileControllers.updateMyProfile
