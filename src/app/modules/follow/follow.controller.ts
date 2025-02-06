@@ -23,19 +23,19 @@ const unfollowUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: "Unfollowed user successfully",
+    message: "",
     data: result,
   });
 });
 
-const getFollowing = catchAsync(async (req: Request, res: Response) => {
+const getFollowingList = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const result = await FollowServices.getFollowing(userId);
+  const followingList = await FollowServices.getFollowing(userId);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
-    message: "Following List Retrieve successfully",
-    data: result,
+    message: "Following list retrieved successfully",
+    data: followingList,
   });
 });
 
@@ -53,6 +53,6 @@ const getFollowers = catchAsync(async (req: Request, res: Response) => {
 export const FollowController = {
   followUser,
   unfollowUser,
-  getFollowing,
+  getFollowingList,
   getFollowers,
 };

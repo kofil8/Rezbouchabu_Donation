@@ -2,6 +2,11 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 
+interface PaginationParams {
+  cursor?: string;
+  take?: number;
+}
+
 const followUser = async (followerId: string, followedId: string) => {
   if (followerId === followedId) {
     throw new Error("Cannot follow yourself");
