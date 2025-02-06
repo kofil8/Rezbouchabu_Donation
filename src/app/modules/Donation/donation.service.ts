@@ -23,11 +23,14 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
   if (!existingUser) {
     throw new ApiError(httpStatus.BAD_REQUEST, "User not found");
   }
+  console.log(files);
+
+  const uploadFolder = "uploads/donations";
 
   const imageURL = files?.donationImages
     ? files.donationImages.map((file: any) =>
         file.originalname
-          ? `${config.backend_image_url}/uploads/donation/${file.originalname}`
+          ? `${config.backend_image_url}/${uploadFolder}/${file.originalname}`
           : ""
       )
     : [];
@@ -81,7 +84,7 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
 
   const currentLevel =
     levels.find(({ threshold }) => user.donationCount >= threshold)?.level ||
-    "GEEVERGOD";
+    "Baby Geever";
 
   if (user.userlevel !== currentLevel) {
     await prisma.user.update({

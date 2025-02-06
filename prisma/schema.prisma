@@ -59,7 +59,7 @@ model User {
   address      String?
 
   donationCount Int    @default(0)
-  userlevel     String @default("BabyGeever")
+  userlevel     String @default("Baby Geever")
 
   latitude  Float?
   longitude Float?
@@ -87,8 +87,23 @@ model User {
   message        Message[]      @relation("UserMessages")
   conversations  Conversation[] @relation("User1Conversations")
   conversations2 Conversation[] @relation("User2Conversations")
+  follower       Follow[]       @relation("UserFollowing")
+  following      Follow[]       @relation("UserFollowers")
 
   @@map("users")
+}
+
+model Follow {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  followerId String   @db.ObjectId
+  followedId String   @db.ObjectId
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  follower User @relation("UserFollowing", fields: [followerId], references: [id])
+  followed User @relation("UserFollowers", fields: [followedId], references: [id])
+
+  @@map("follows")
 }
 
 model Otp {
@@ -127,8 +142,8 @@ model antiWastePost {
   title           String
   description     String?
   price           Float
-  contactNumber   String
-  address         String
+  contactNumber   String?
+  address         String?
   antiWasteImages Json[]
   latitude        Float?
   longitude       Float?

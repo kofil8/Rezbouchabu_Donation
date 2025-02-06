@@ -12,6 +12,7 @@ import { DonationRouters } from "../modules/donation/donation.routes";
 import { FavouriteRouters } from "../modules/favorite/favourite.routes";
 import { NotificationsRouters } from "../modules/notifications/notification.routes";
 import { ReviewRouters } from "../modules/review/review.routes";
+import { FollowRouters } from "../modules/follow/follow.router";
 
 const router = express.Router();
 
@@ -61,12 +62,16 @@ const moduleRoutes = [
     route: RequestRouters,
   },
   {
-    path: "/antiWaste",
+    path: "/anti-waste",
     route: AntiWastePostRouters,
   },
   {
     path: "/subscription",
     route: SubscriptionRouters,
+  },
+  {
+    path: "/follow",
+    route: FollowRouters,
   },
 ];
 
