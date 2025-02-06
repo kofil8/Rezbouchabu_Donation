@@ -19,31 +19,6 @@ enum Role {
   USER
 }
 
-enum NotificationType {
-  DONATION
-  REVIEW
-  PLAN
-  MESSAGE
-}
-
-enum DonationStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-enum DonorLevel {
-  BABYGEEVER
-  LITTLEGEEVER
-  TEENGEEVER
-  ADULTGEEVER
-  STRONGGEEVER
-  MASTERGEEVER
-  KINGOFTHEGEEVERS
-  GEEVERGOD
-}
-
 enum SubscriptionStatus {
   ACTIVE
   INACTIVE
@@ -83,6 +58,9 @@ model User {
   fcmToken     String?
   address      String?
 
+  donationCount Int    @default(0)
+  userlevel     String @default("BabyGeever")
+
   latitude  Float?
   longitude Float?
 
@@ -102,9 +80,8 @@ model User {
   reviews       Review[]        @relation
   notifications Notifications[] @relation("Notifications")
 
-  categories CategoryPost[]
-  conditions ConditionPost[]
-  level      level[]
+  categories CategoryPost[]  @relation
+  conditions ConditionPost[] @relation
   Otp        Otp[]
 
   message        Message[]      @relation("UserMessages")
@@ -126,18 +103,6 @@ model Otp {
   userId    String?  @db.ObjectId
 
   @@map("otps")
-}
-
-model level {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  level     DonorLevel @default(BABYGEEVER)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  userId    String     @db.ObjectId
-  User      User       @relation(fields: [userId], references: [id])
-
-  @@map("levels")
 }
 
 model Subscription {
@@ -273,22 +238,6 @@ model Favourite {
 
   @@map("favourites")
 }
-
-// model Order {
-//   id         String @id @default(auto()) @map("_id") @db.ObjectId
-//   userId     String @db.ObjectId
-//   user       User   @relation(fields: [userId], references: [id])
-//   businessId String @db.ObjectId
-//   donationId String @db.ObjectId
-//   quantity   Int
-//   total      Float
-
-//   status    DonationStatus
-//   createdAt DateTime       @default(now())
-//   updatedAt DateTime       @updatedAt
-
-//   @@map("orders")
-// }
 
 model Review {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId

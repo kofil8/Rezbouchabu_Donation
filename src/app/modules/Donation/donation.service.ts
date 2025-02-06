@@ -57,21 +57,40 @@ const createDonationIntoDB = async (id: string, payload: any, files: any) => {
       ...parsedPayload,
       donationImages: imageURL,
     },
-    select: {
-      id: true,
-      userId: true,
-      name: true,
-      description: true,
-      donationImages: true,
-      category: true,
-      subcategory: true,
-      latitude: true,
-      longitude: true,
-      condition: true,
-      createdAt: true,
-      updatedAt: true,
+  });
+
+  // Update user's donation count and level
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      donationCount: {
+        increment: 1,
+      },
     },
   });
+
+  const levels = [
+    { threshold: 1000, level: "Goddess of the Geevers" },
+    { threshold: 500, level: "Queen of the Geevers" },
+    { threshold: 100, level: "Master Geever" },
+    { threshold: 50, level: "Strong Geever" },
+    { threshold: 25, level: "Adult Geever" },
+    { threshold: 10, level: "Teen Geever" },
+    { threshold: 2, level: "Little Geever" },
+  ];
+
+  const currentLevel =
+    levels.find(({ threshold }) => user.donationCount >= threshold)?.level ||
+    "GEEVERGOD";
+
+  if (user.userlevel !== currentLevel) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        userlevel: currentLevel,
+      },
+    });
+  }
 
   return donation;
 };

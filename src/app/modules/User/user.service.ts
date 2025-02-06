@@ -3,13 +3,10 @@ import httpStatus from "http-status";
 import { Secret } from "jsonwebtoken";
 import config from "../../../config";
 import ApiError from "../../../errors/ApiErrors";
-import { emailTemplate } from "../../../helpars/emailtempForOTP";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import { generateToken } from "../../../utils/generateToken";
 import { generateTokenReset } from "../../../utils/generateTokenForReset";
-import sentEmailUtility from "../../../utils/sentEmailUtility";
-import logger from "../../../utils/logger";
 import { generateOtp } from "../../../utils/otpGenerateResetP";
 import { generateOtpReg } from "../../../utils/otpGenerateReg";
 

@@ -92,6 +92,19 @@ const createSubscription = async (userId: string, planId: string) => {
     );
   }
 
+  const existingSubscription = await prisma.subscription.findFirst({
+    where: {
+      userId: userId,
+    },
+  });
+
+  if (existingSubscription) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "User already has a subscription"
+    );
+  }
+
   const subscription = await stripe.subscriptions.create({
     customer: user.stripeCustomerId,
     items: [{ price: planId }],

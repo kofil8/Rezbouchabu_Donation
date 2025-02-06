@@ -1,17 +1,17 @@
 import express from "express";
-import { UserRouters } from "../modules/User/user.router";
-import { AuthRouters } from "../modules/Auth/auth.router";
-import { ReviewRouters } from "../modules/review/review.routes";
-import { NotificationsRouters } from "../modules/notifications/notification.routes";
-import { ChatRouters } from "../modules/chat/chat.route";
-import { DonationRouters } from "../modules/Donation/donation.routes";
-import { ProfileRouters } from "../modules/Profile/profile.router";
-import { RequestRouters } from "../modules/Request/request.router";
-import { FavouriteRouters } from "../modules/favorite/favourite.routes";
-import { SubscriptionRouters } from "../modules/Subscription/subscription.routes";
-import { CategoryRouters } from "../modules/categoryPost/category.routes";
-import { ConditionRouters } from "../modules/conditionPost/condition.router";
+import { ProfileRouters } from "../modules/profile/profile.router";
+import { RequestRouters } from "../modules/request/request.router";
+import { SubscriptionRouters } from "../modules/subscription/subscription.routes";
+import { UserRouters } from "../modules/user/user.router";
 import { AntiWastePostRouters } from "../modules/antiWastePost/antiWaste.router";
+import { AuthRouters } from "../modules/auth/auth.router";
+import { CategoryRouters } from "../modules/categoryPost/category.routes";
+import { ChatRouters } from "../modules/chat/chat.route";
+import { ConditionRouters } from "../modules/conditionPost/condition.router";
+import { DonationRouters } from "../modules/donation/donation.routes";
+import { FavouriteRouters } from "../modules/favorite/favourite.routes";
+import { NotificationsRouters } from "../modules/notifications/notification.routes";
+import { ReviewRouters } from "../modules/review/review.routes";
 
 const router = express.Router();
 
