@@ -11,13 +11,8 @@ router.get("/", auth(), RequestControllers.getAllRequests);
 
 router.get("/:id", auth(), RequestControllers.getSingleRequest);
 
-router.patch(
-  "/:id",
-  auth("ADMIN", "DONOR"),
-  parseBodyData,
-  RequestControllers.updateRequest
-);
+router.patch("/:id", auth(), parseBodyData, RequestControllers.updateRequest);
 
-router.delete("/:id", auth("ADMIN", "DONOR"), RequestControllers.deleteRequest);
+router.delete("/:id", auth(), RequestControllers.deleteRequest);
 
 export const RequestRouters = router;

@@ -10,9 +10,7 @@ import { generateTokenReset } from "../../../utils/generateTokenForReset";
 import { generateOtp } from "../../../utils/otpGenerateResetP";
 import { generateOtpReg } from "../../../utils/otpGenerateReg";
 
-const registerUserIntoDB = async (payload: any) => {
-  const hashedPassword: string = await bcrypt.hash(payload.password, 12);
-
+const registerUserIntoDB = async (payload: any, file: any) => {
   const existingUser = await prisma.user.findUnique({
     where: {
       email: payload.email,
@@ -25,13 +23,27 @@ const registerUserIntoDB = async (payload: any) => {
       "User already exists with this email"
     );
   }
-
+  const profileImage = file.originalname
+    ? `${config.backend_image_url}/uploads/profile/${file.originalname}`
+    : "";
   const fullName = `${payload.firstName} ${payload.lastName}`;
+
+  let parsedPayload = payload;
+  if (typeof payload === "string") {
+    try {
+      parsedPayload = JSON.parse(payload);
+    } catch (error) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid payload format");
+    }
+  }
+
+  const hashedPassword: string = await bcrypt.hash(payload.password, 12);
 
   const user = await prisma.user.create({
     data: {
       ...payload,
       fullName,
+      profileImage,
       password: hashedPassword,
       isVerified: false,
     },

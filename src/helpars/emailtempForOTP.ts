@@ -72,7 +72,7 @@ export const emailTemplate = (otp: number, text: string) => `
                 <table cellpadding="0" cellspacing="0" class="container">
                     <tr>
                         <td align="center" class="logo" style="padding:30px 20px;">
-                            <img src=${imageurl} alt="Logo" style="display:block; border:0;"/>
+                            <img src=${imageurl} height="200", width="200" alt="Logo" style="display:block; border:0;"/>
                         </td>
                     </tr>
                     <tr>

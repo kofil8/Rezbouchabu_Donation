@@ -1,12 +1,13 @@
-import httpStatus from "http-status";
-import { UserServices } from "./user.service";
 import { Request, Response } from "express";
-import sendResponse from "../../../utils/sendResponse";
+import httpStatus from "http-status";
 import catchAsync from "../../../utils/catchAsync";
+import sendResponse from "../../../utils/sendResponse";
+import { UserServices } from "./user.service";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
-  const payload = req.body;
-  const result = await UserServices.registerUserIntoDB(payload);
+  const payload = req.body.bodyData;
+  const file = req.file as any;
+  const result = await UserServices.registerUserIntoDB(payload, file);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,

@@ -1,8 +1,8 @@
 import express from "express";
-import { parseBodyData } from "../../middlewares/parseBodyData";
 import auth from "../../middlewares/auth";
 import { AnitWasteControllers } from "./antiWaste.controlller";
 import { fileUploader } from "../../../helpars/fileUploader";
+import parseBodyData from "../../../helpars/parseBodyData";
 
 const router = express.Router();
 

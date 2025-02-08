@@ -3,10 +3,17 @@ import auth from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import { UserControllers } from "./user.controller";
 import { UserValidations } from "./user.validation";
+import { fileUploader } from "../../../helpars/fileUploader";
+import parseBodyData from "../../../helpars/parseBodyData";
 
 const router = express.Router();
 
-router.post("/register", UserControllers.registerUser);
+router.post(
+  "/register",
+  fileUploader.uploadprofileImage,
+  parseBodyData,
+  UserControllers.registerUser
+);
 
 router.post(
   "/verify-otp",
@@ -20,7 +27,7 @@ router.post(
   UserControllers.resendOtpReg
 );
 
-router.get("/", UserControllers.getAllUsers);
+router.get("/", auth(), UserControllers.getAllUsers);
 
 router.get("/:id", auth(), UserControllers.getUserDetails);
 

@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/me", auth(), ProfileControllers.getMyProfile);
 router.patch(
   "/update",
-  auth("DONOR", "ADMIN", "SELLER", "USER"),
+  auth(),
   parseBodyData,
   fileUploader.uploadprofileImage,
   ProfileControllers.updateMyProfile
