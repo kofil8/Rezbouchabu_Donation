@@ -181,6 +181,7 @@ model Donation {
   condition      String?
   latitude       Float?
   longitude      Float?
+  isDeleted      Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -203,6 +204,7 @@ model Requests {
   subcategory String?
   latitude    Float?
   longitude   Float?
+  isDeleted   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

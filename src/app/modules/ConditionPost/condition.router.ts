@@ -4,14 +4,10 @@ import { ConditionControllers } from "./conditon.controller";
 
 const router = express.Router();
 
-router.post("/create", auth("ADMIN"), ConditionControllers.addCondition);
+router.post("/create", auth(), ConditionControllers.addCondition);
 
-router.get("/", auth("ADMIN", "USER"), ConditionControllers.getConditionList);
+router.get("/", auth(), ConditionControllers.getConditionList);
 
-router.delete(
-  "/:conditionId",
-  auth("ADMIN"),
-  ConditionControllers.removeConditionDB
-);
+router.delete("/:conditionId", auth(), ConditionControllers.removeConditionDB);
 
 export const ConditionRouters = router;
